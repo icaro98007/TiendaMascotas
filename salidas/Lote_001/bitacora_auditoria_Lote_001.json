@@ -1,34 +1,34 @@
 [
   {
-    "timestamp": "2026-10-30T21:08:44.706408",
+    "timestamp": "2026-11-05T15:50:15.725523",
     "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_001",
     "accion": "INICIO_LOTE",
     "detalles": "Iniciando análisis para carpeta Drive 'Lote_1' (ID: drv_1)"
   },
   {
-    "timestamp": "2026-10-30T21:08:44.706408",
+    "timestamp": "2026-11-05T15:50:15.725523",
     "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_001",
     "accion": "LECTURA_RADICADO",
     "detalles": "2 solicitudes leídas exitosamente."
   },
   {
-    "timestamp": "2026-10-30T21:08:44.706408",
+    "timestamp": "2026-11-05T15:50:15.725523",
     "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_001",
     "accion": "COMPROBACION_LINKS",
     "detalles": "4 enlaces de Drive evaluados."
   },
   {
-    "timestamp": "2026-10-30T21:08:44.706408",
+    "timestamp": "2026-11-05T15:50:15.725523",
     "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_001",
     "accion": "NORMALIZACION",
     "detalles": "Normalización completada preservando originales."
   },
   {
-    "timestamp": "2026-10-30T21:08:44.706408",
+    "timestamp": "2026-11-05T15:50:15.725523",
     "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_001",
     "accion": "REGLAS_EVALUADAS",

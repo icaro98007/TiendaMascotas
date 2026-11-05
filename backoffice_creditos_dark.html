@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backoffice de Créditos | Módulo de Radicación (Reto 2)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#9333ea',
+                            purpleHover: '#a855f7',
+                            dark: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0f172a; /* bg-slate-900 */
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.5); /* bg-slate-800/50 */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(51, 65, 85, 0.6); /* border-slate-700 */
+        }
+
+        .drop-zone {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drop-zone.dragover {
+            border-color: #a855f7 !important;
+            background-color: rgba(147, 51, 234, 0.08) !important;
+            transform: scale(1.01);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.2);
+        }
+
+        .spinner-dual {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 4px solid rgba(51, 65, 85, 0.5);
+            border-top-color: #9333ea;
+            border-right-color: #3b82f6;
+            animation: spinDual 0.9s linear infinite;
+        }
+
+        @keyframes spinDual {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col bg-slate-900 text-slate-100 selection:bg-purple-600 selection:text-white">
+
+    <!-- Top Navigation Bar Glassmorphism -->
+    <header class="glass-panel sticky top-0 z-40 w-full px-6 py-3.5 border-b border-slate-700/60 shadow-lg shadow-slate-950/20">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            
+            <div class="flex items-center gap-3.5">
+                <div class="bg-gradient-to-tr from-purple-700 to-purple-500 text-white p-2.5 rounded-xl shadow-[0_0_20px_rgba(147,51,234,0.35)] flex items-center justify-center border border-purple-400/30">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg text-white tracking-wide">Backoffice <span class="text-purple-400 font-extrabold">Créditos</span></h1>
+                        <span class="text-[11px] font-semibold bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full border border-purple-700/50">Reto 2 - v0.1</span>
+                    </div>
+                    <p class="text-xs text-slate-300 font-medium">Captura y Normalización Documental Integrable (Lote 01)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <nav class="hidden md:flex items-center gap-4 text-xs font-medium">
+                    <span class="text-blue-400 flex items-center gap-1.5"><i data-lucide="file-check" class="w-3.5 h-3.5"></i> 10 Solicitudes</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-purple-400 flex items-center gap-1.5"><i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> 62 URLs Drive</span>
+                </nav>
+
+                <div class="flex items-center gap-3 pl-2 border-l border-slate-700/60">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-semibold text-white">Analista BPO</p>
+                        <p class="text-[11px] text-slate-300 flex items-center justify-end gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Validación Activa
+                        </p>
+                    </div>
+                    <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700 text-purple-400 shadow-inner">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center relative">
+
+        <!-- VISTA 1: ZONA DE CARGA -->
+        <section id="view-upload" class="w-full transition-all duration-300">
+            <div class="mb-8 text-center max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 border border-blue-700/40 text-blue-300 text-xs font-semibold mb-3">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i> Plan de Pruebas: TC-01 a TC-06
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Carga de <span class="text-purple-400">Radicado & Matriz</span> Lote 01
+                </h2>
+                <p class="mt-2 text-sm text-slate-300">
+                    Carga los archivos con datos sucios, formatos mixtos y enlaces de Google Drive para ejecutar el cruce automático de reglas.
+                </p>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl shadow-slate-950/50 relative overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                    
+                    <!-- ZONA 1: RADICADO -->
+                    <div class="flex flex-col">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <label class="text-sm font-semibold text-white flex items-center gap-2">
+                                <span class="bg-blue-900/50 text-blue-300 border border-blue-700/50 w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold">1</span>
+                                Radicado (10 Solicitudes)
+                            </label>
+                            <span class="text-xs text-blue-400 font-medium">radicado_lote_01.csv</span>
+                        </div>
+
+                        <div id="drop-zone-radicado" class="drop-zone flex-1 min-h-[210px] relative border-2 border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-slate-800/40 hover:border-purple-500 hover:bg-slate-800/60 group">
+                            <input type="file" id="file-radicado" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".csv, .xlsx">
+                            
+                            <div id="ui-empty-radicado" class="flex flex-col items-center pointer-events-none transition-transform group-hover:scale-105 duration-200">
+                                <div class="bg-slate-800 p-3.5 rounded-2xl mb-3 border border-slate-700 text-purple-400 group-hover:border-purple-500/60 group-hover:text-purple-300 shadow-md transition-colors">
+                                    <i data-lucide="file-spreadsheet" class="w-7 h-7"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">Arrastra radicado_lote_01.csv aquí</p>
+                                <p class="text-xs text-slate-300 mt-1">o haz clic para explorar en el equipo</p>
+                            </div>
+
+                            <div id="ui-filled-radicado" class="hidden flex flex-col items-center w-full z-10">
+                                <div class="bg-emerald-950/40 p-3 rounded-2xl mb-2.5 border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+                                    <i data-lucide="check-circle-2" class="w-7 h-7 text-emerald-400"></i>
+                                </div>
+                                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Cargado con éxito</span>
+                                <p id="filename-radicado" class="text-sm font-bold text-white truncate max-w-[240px] px-2 py-0.5 bg-slate-900/60 rounded border border-slate-700/60"></p>
+                                <p id="filesize-radicado" class="text-xs text-slate-300 mt-1"></p>
+                                <button type="button" id="btn-remove-radicado" class="mt-3 text-xs text-slate-400 hover:text-red-400 flex items-center gap-1 z-30 transition-colors">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i> Cambiar archivo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ZONA 2: MATRIZ -->
+                    <div class="flex flex-col">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <label class="text-sm font-semibold text-white flex items-center gap-2">
+                                <span class="bg-blue-900/50 text-blue-300 border border-blue-700/50 w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold">2</span>
+                                Matriz (62 URLs Drive)
+                            </label>
+                            <span class="text-xs text-blue-400 font-medium">matriz_documentos_lote_01.csv</span>
+                        </div>
+
+                        <div id="drop-zone-matriz" class="drop-zone flex-1 min-h-[210px] relative border-2 border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer bg-slate-800/40 hover:border-purple-500 hover:bg-slate-800/60 group">
+                            <input type="file" id="file-matriz" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".csv, .xlsx">
+                            
+                            <div id="ui-empty-matriz" class="flex flex-col items-center pointer-events-none transition-transform group-hover:scale-105 duration-200">
+                                <div class="bg-slate-800 p-3.5 rounded-2xl mb-3 border border-slate-700 text-purple-400 group-hover:border-purple-500/60 group-hover:text-purple-300 shadow-md transition-colors">
+                                    <i data-lucide="folder-git-2" class="w-7 h-7"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">Arrastra matriz_documentos.csv aquí</p>
+                                <p class="text-xs text-slate-300 mt-1">o haz clic para explorar en el equipo</p>
+                            </div>
+
+                            <div id="ui-filled-matriz" class="hidden flex flex-col items-center w-full z-10">
+                                <div class="bg-emerald-950/40 p-3 rounded-2xl mb-2.5 border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+                                    <i data-lucide="check-circle-2" class="w-7 h-7 text-emerald-400"></i>
+                                </div>
+                                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Cargado con éxito</span>
+                                <p id="filename-matriz" class="text-sm font-bold text-white truncate max-w-[240px] px-2 py-0.5 bg-slate-900/60 rounded border border-slate-700/60"></p>
+                                <p id="filesize-matriz" class="text-xs text-slate-300 mt-1"></p>
+                                <button type="button" id="btn-remove-matriz" class="mt-3 text-xs text-slate-400 hover:text-red-400 flex items-center gap-1 z-30 transition-colors">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i> Cambiar archivo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-700/60 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
+                    <button type="button" id="btn-demo" class="text-xs font-medium text-blue-400 hover:text-blue-300 underline underline-offset-4 flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i> Cargar Lote 01 de Pruebas (Simulación directa)
+                    </button>
+
+                    <!-- CTA Morado -->
+                    <button id="btn-procesar" disabled class="w-full sm:w-auto px-7 py-3.5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600/30 transition-all duration-200 disabled:opacity-35 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(147,51,234,0.35)] disabled:shadow-none">
+                        <i data-lucide="cpu" class="w-5 h-5 text-purple-200"></i>
+                        <span>Iniciar Validación (2s)</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-purple-200"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 2: LOADER SPINNER (2 segundos) -->
+        <section id="view-loading" class="hidden w-full flex-col items-center justify-center py-16 px-4">
+            <div class="glass-panel rounded-3xl p-10 sm:p-12 flex flex-col items-center text-center max-w-md w-full border border-slate-700 shadow-2xl relative">
+                <div class="relative mb-6">
+                    <div class="spinner-dual"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i data-lucide="shield" class="w-5 h-5 text-purple-400 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold text-white mb-2 tracking-wide">Ejecutando Plan de Pruebas...</h3>
+                <p id="loading-stage" class="text-sm text-slate-300 mb-6 transition-all duration-300">Paso 1/3: Verificando accesibilidad HTTP HEAD a URLs de Drive</p>
+
+                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+                    <div id="loading-progress-bar" class="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full transition-all duration-[2000ms] ease-out" style="width: 0%"></div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between w-full text-xs text-slate-400">
+                    <span class="flex items-center gap-1.5 text-blue-400">
+                        <i data-lucide="server" class="w-3.5 h-3.5"></i> Motor de Reglas Activo
+                    </span>
+                    <span class="text-purple-300 font-mono">2.0s</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 3: RESULTADOS (TC-01 AL TC-06) -->
+        <section id="view-results" class="hidden w-full opacity-0 transition-opacity duration-500">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-xs font-semibold">
+                            <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Lote 01 Procesado (6/6 Casos Verificados)
+                        </span>
+                        <span class="text-xs text-slate-400">Tiempo de respuesta: <span class="text-white font-mono">1.96s</span></span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Reporte de Incidencias & Auditoría Documental</h2>
+                    <p class="text-sm text-slate-300">Hallazgos generados por normalización de datos, verificación de enlaces y cruce de reglas.</p>
+                </div>
+
+                <div class="flex items-center gap-2.5 self-start md:self-auto">
+                    <button id="btn-nuevo-lote" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl border border-slate-700 transition-colors flex items-center gap-2 text-xs shadow-sm">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-purple-400"></i> Cargar Nuevo Lote
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="glass-panel p-4 rounded-xl border border-slate-700/70">
+                    <p class="text-xs font-medium text-slate-400 mb-1">Solicitudes Evaluadas</p>
+                    <span class="text-2xl font-extrabold text-white">10 Lote 01</span>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-700/70">
+                    <p class="text-xs font-medium text-slate-400 mb-1">URLs Drive Analizadas</p>
+                    <span class="text-2xl font-extrabold text-blue-400">62 Docs (TC-01)</span>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-700/70">
+                    <p class="text-xs font-medium text-slate-400 mb-1">Revisión Humana Req.</p>
+                    <span class="text-2xl font-extrabold text-purple-400">3 Casos (TC-04)</span>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-700/70">
+                    <p class="text-xs font-medium text-slate-400 mb-1">Normalización Fechas/Montos</p>
+                    <span class="text-2xl font-extrabold text-emerald-400">100% Sin Inferir</span>
+                </div>
+            </div>
+
+            <!-- Tabla de Casos de Prueba Reales -->
+            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
+                <div class="p-3 bg-slate-800/80 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="text-slate-300 font-medium">Matriz de Incidencias Operativas (Casos TC-01 a TC-06)</span>
+                    <span class="text-purple-300 bg-purple-950/40 px-2.5 py-0.5 rounded border border-purple-800/40">Gobernanza Humana Activa</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-800/90 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold text-slate-300">Solicitud & Tipo</th>
+                                <th class="px-6 py-4 font-semibold text-slate-300">Caso / Incidencia</th>
+                                <th class="px-6 py-4 font-semibold text-slate-300">Detalle & Hallazgo</th>
+                                <th class="px-6 py-4 font-semibold text-slate-300">Estado / Delegación</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50 text-xs sm:text-sm">
+                            
+                            <!-- TC-02: SOL-0002 Educativo -->
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4 font-mono font-semibold text-white">
+                                    SOL-0002 <span class="block text-xs font-normal text-blue-400">Educativo</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-blue-900/40 text-blue-300 px-2.5 py-1 rounded-md border border-blue-700/50 text-xs font-medium inline-flex items-center gap-1">
+                                        <i data-lucide="file-plus" class="w-3 h-3 text-blue-400"></i> TC-02: Archivo Sobrante
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-300">
+                                    Recibo de matrícula presente (Completo). Archivo <code class="text-purple-300 bg-slate-900 px-1.5 py-0.5 rounded">correo_solicitud.eml</code> catalogado como sobrante para conciliación.
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs text-blue-400 bg-blue-950/40 border border-blue-800/40 px-2 py-0.5 rounded">Informativa</span>
+                                </td>
+                            </tr>
+
+                            <!-- TC-01 & TC-05: SOL-0003 Calamidad -->
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4 font-mono font-semibold text-white">
+                                    SOL-0003 <span class="block text-xs font-normal text-purple-400">Calamidad</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-purple-900/40 text-purple-300 px-2.5 py-1 rounded-md border border-purple-700/50 text-xs font-medium inline-flex items-center gap-1">
+                                        <i data-lucide="lock" class="w-3 h-3 text-purple-400"></i> TC-01 / TC-05: URL 403 & SLA 1D
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-300">
+                                    Prioridad ALTA asignada (SLA 1 día). URL Drive de soporte de calamidad arrojó HTTP 403 (Privado).
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs text-purple-300 bg-purple-950/40 border border-purple-800/40 px-2 py-0.5 rounded">Revisión Humana</span>
+                                </td>
+                            </tr>
+
+                            <!-- TC-04: SOL-0004 Formulario sin firma -->
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4 font-mono font-semibold text-white">
+                                    SOL-0004 <span class="block text-xs font-normal text-slate-400">Libranza</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-purple-900/40 text-purple-300 px-2.5 py-1 rounded-md border border-purple-700/50 text-xs font-medium inline-flex items-center gap-1">
+                                        <i data-lucide="edit-3" class="w-3 h-3 text-purple-400"></i> TC-04: Sin Firma Visible
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-300">
+                                    Formulario de solicitud no registra estampa de firma. Estado: <strong class="text-white">REQUERIDA - MARCAR PARA REVISIÓN HUMANA</strong>.
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs text-purple-300 bg-purple-950/40 border border-purple-800/40 px-2 py-0.5 rounded">Subsanación</span>
+                                </td>
+                            </tr>
+
+                            <!-- TC-06: SOL-0006 Umbral Codeudor -->
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4 font-mono font-semibold text-white">
+                                    SOL-0006 <span class="block text-xs font-normal text-slate-400">Consumo</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-purple-900/40 text-purple-300 px-2.5 py-1 rounded-md border border-purple-700/50 text-xs font-medium inline-flex items-center gap-1">
+                                        <i data-lucide="user-x" class="w-3 h-3 text-purple-400"></i> TC-06: Umbral Codeudor (> $8M)
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-300">
+                                    Monto inyectado $9.500.000 COP superó el umbral. Requisito dinámico "Codeudor o garantía" no encontrado en Drive.
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs text-purple-300 bg-purple-950/40 border border-purple-800/40 px-2 py-0.5 rounded">Incompleto / Faltante</span>
+                                </td>
+                            </tr>
+
+                            <!-- TC-03: SOL-0010 Normalización Conforme -->
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4 font-mono font-semibold text-white">
+                                    SOL-0010 <span class="block text-xs font-normal text-emerald-400">Vivienda</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-emerald-950/40 text-emerald-300 px-2.5 py-1 rounded-md border border-emerald-500/40 text-xs font-medium inline-flex items-center gap-1">
+                                        <i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i> TC-03: Normalización Exitosa
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-300">
+                                    Monto "$ 5,300,000.00" -> 5300000 COP. Fecha "23 Oct 2026" -> 2026-10-23. Campos vacíos preservados como NULL sin inferencias.
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded">Conforme</span>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- WIDGET FLOTANTE WHATSAPP -->
+    <aside class="fixed bottom-6 left-6 z-[9999] flex items-center gap-3 group" aria-label="Soporte WhatsApp">
+        <a href="https://wa.me/573000000000?text=Hola,%20requiero%20asistencia%20en%20el%20Backoffice%20de%20Cr%C3%A9ditos" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           class="relative bg-emerald-500 hover:bg-emerald-400 text-slate-950 p-3.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.45)] hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+            </svg>
+            <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-[10px] font-bold text-white border-2 border-slate-900 shadow">1</span>
+        </a>
+        <div class="opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 pointer-events-none transition-all duration-300 bg-slate-800 text-slate-200 text-xs font-semibold py-2 px-3.5 rounded-xl shadow-xl border border-slate-700 whitespace-nowrap flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Mesa de Ayuda Operativa</span>
+        </div>
+    </aside>
+
+    <script>
+        lucide.createIcons();
+        const state = { radicado: null, matriz: null };
+        const btnProcesar = document.getElementById('btn-procesar');
+        const btnDemo = document.getElementById('btn-demo');
+        const btnNuevoLote = document.getElementById('btn-nuevo-lote');
+        const viewUpload = document.getElementById('view-upload');
+        const viewLoading = document.getElementById('view-loading');
+        const viewResults = document.getElementById('view-results');
+        const loadingStage = document.getElementById('loading-stage');
+        const progressBar = document.getElementById('loading-progress-bar');
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 KB';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function updateFileUI(type, file) {
+            state[type] = file;
+            document.getElementById(`ui-empty-${type}`).classList.add('hidden');
+            document.getElementById(`ui-filled-${type}`).classList.remove('hidden');
+            document.getElementById(`filename-${type}`).textContent = file.name;
+            document.getElementById(`filesize-${type}`).textContent = formatBytes(file.size);
+
+            const dropZone = document.getElementById(`drop-zone-${type}`);
+            dropZone.classList.add('border-emerald-500/60', 'bg-emerald-950/10');
+            dropZone.classList.remove('border-slate-700', 'bg-slate-800/40');
+
+            if (state.radicado && state.matriz) {
+                btnProcesar.disabled = false;
+            }
+            lucide.createIcons();
+        }
+
+        function resetFile(type) {
+            state[type] = null;
+            const input = document.getElementById(`file-${type}`);
+            if (input) input.value = '';
+            document.getElementById(`ui-empty-${type}`).classList.remove('hidden');
+            document.getElementById(`ui-filled-${type}`).classList.add('hidden');
+            const dropZone = document.getElementById(`drop-zone-${type}`);
+            dropZone.classList.remove('border-emerald-500/60', 'bg-emerald-950/10');
+            dropZone.classList.add('border-slate-700', 'bg-slate-800/40');
+            btnProcesar.disabled = true;
+        }
+
+        ['radicado', 'matriz'].forEach((type) => {
+            const input = document.getElementById(`file-${type}`);
+            const zone = document.getElementById(`drop-zone-${type}`);
+            const btnRemove = document.getElementById(`btn-remove-${type}`);
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); }));
+            ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, () => zone.classList.add('dragover')));
+            ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, () => zone.classList.remove('dragover')));
+
+            zone.addEventListener('drop', (e) => {
+                if (e.dataTransfer && e.dataTransfer.files.length) {
+                    input.files = e.dataTransfer.files;
+                    updateFileUI(type, e.dataTransfer.files[0]);
+                }
+            });
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length) updateFileUI(type, e.target.files[0]);
+            });
+
+            if (btnRemove) {
+                btnRemove.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    resetFile(type);
+                });
+            }
+        });
+
+        btnDemo.addEventListener('click', () => {
+            updateFileUI('radicado', new File(["dummy"], "radicado_lote_01.csv", { type: "text/csv" }));
+            updateFileUI('matriz', new File(["dummy"], "matriz_documentos_lote_01.csv", { type: "text/csv" }));
+        });
+
+        // Enlace: Carga -> 2s Loader -> Resultados (TC-01 a TC-06)
+        btnProcesar.addEventListener('click', () => {
+            if (!state.radicado || !state.matriz) return;
+
+            viewUpload.style.opacity = '0';
+            setTimeout(() => {
+                viewUpload.classList.add('hidden');
+                viewLoading.classList.remove('hidden');
+                viewLoading.classList.add('flex');
+                
+                progressBar.style.width = '0%';
+                setTimeout(() => progressBar.style.width = '100%', 50);
+                setTimeout(() => loadingStage.textContent = "Paso 2/3: Verificando firmas (TC-04) y umbral de codeudor (TC-06)...", 750);
+                setTimeout(() => loadingStage.textContent = "Paso 3/3: Normalizando montos/fechas sin inferir nulos (TC-03)...", 1400);
+
+                setTimeout(() => {
+                    viewLoading.classList.add('hidden');
+                    viewLoading.classList.remove('flex');
+                    viewResults.classList.remove('hidden');
+                    lucide.createIcons();
+                    setTimeout(() => viewResults.classList.remove('opacity-0'), 50);
+                }, 2000);
+            }, 300);
+        });
+
+        btnNuevoLote.addEventListener('click', () => {
+            resetFile('radicado');
+            resetFile('matriz');
+            viewResults.classList.add('opacity-0');
+            setTimeout(() => {
+                viewResults.classList.add('hidden');
+                viewUpload.classList.remove('hidden');
+                setTimeout(() => viewUpload.style.opacity = '1', 50);
+            }, 300);
+        });
+    </script>
+</body>
+</html>

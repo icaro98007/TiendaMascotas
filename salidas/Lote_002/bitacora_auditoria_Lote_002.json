@@ -1,35 +1,35 @@
 [
   {
-    "timestamp": "2026-10-30T21:21:53.710346",
-    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "timestamp": "2026-11-05T15:50:15.804286",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_002",
     "accion": "INICIO_LOTE",
-    "detalles": "Iniciando análisis para carpeta Drive 'Radicaciones_Lote_002' (ID: drv_folder_008)"
+    "detalles": "Iniciando análisis para carpeta Drive 'Carpeta_Links' (ID: drv_test_links)"
   },
   {
-    "timestamp": "2026-10-30T21:21:53.710346",
-    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "timestamp": "2026-11-05T15:50:15.804286",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_002",
     "accion": "LECTURA_RADICADO",
     "detalles": "5 solicitudes leídas exitosamente."
   },
   {
-    "timestamp": "2026-10-30T21:21:53.710346",
-    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "timestamp": "2026-11-05T15:50:15.804286",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_002",
     "accion": "COMPROBACION_LINKS",
     "detalles": "18 enlaces de Drive evaluados."
   },
   {
-    "timestamp": "2026-10-30T21:21:53.710346",
-    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "timestamp": "2026-11-05T15:50:15.804286",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_002",
     "accion": "NORMALIZACION",
     "detalles": "Normalización completada preservando originales."
   },
   {
-    "timestamp": "2026-10-30T21:21:53.710346",
-    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "timestamp": "2026-11-05T15:50:15.804286",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
     "lote_id": "Lote_002",
     "accion": "REGLAS_EVALUADAS",
     "detalles": "Evaluadas reglas POL-2026.1. 16 incidencias generadas."
