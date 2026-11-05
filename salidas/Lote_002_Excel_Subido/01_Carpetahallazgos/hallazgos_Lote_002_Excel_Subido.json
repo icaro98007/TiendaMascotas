@@ -1,0 +1,47 @@
+[
+  {
+    "id_incidencia": "INC-SOL-1001-FIRMA-01",
+    "id_solicitud": "SOL-1001",
+    "id_documento": "DOC-01",
+    "tipo_incidencia": "FIRMA_NO_VISIBLE",
+    "severidad": "ALTA",
+    "impacto": "Formulario sin firma física o digital visible no puede ser tramitado.",
+    "detalle": "No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.",
+    "evidencia_fuente": "Página 1 de SOL-1001_Formulario.pdf",
+    "accion_sugerida": "Revisar manualmente el documento para verificar existencia de firma.",
+    "estado_revision": "PENDIENTE_HUMANO",
+    "revisado_por": null,
+    "fecha_revision": null,
+    "comentario_revisor": null
+  },
+  {
+    "id_incidencia": "INC-SOL-1002-FIRMA-01",
+    "id_solicitud": "SOL-1002",
+    "id_documento": "DOC-05",
+    "tipo_incidencia": "FIRMA_NO_VISIBLE",
+    "severidad": "ALTA",
+    "impacto": "Formulario sin firma física o digital visible no puede ser tramitado.",
+    "detalle": "No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.",
+    "evidencia_fuente": "Página 1 de SOL-1002_Formulario.pdf",
+    "accion_sugerida": "Revisar manualmente el documento para verificar existencia de firma.",
+    "estado_revision": "PENDIENTE_HUMANO",
+    "revisado_por": null,
+    "fecha_revision": null,
+    "comentario_revisor": null
+  },
+  {
+    "id_incidencia": "INC-SOL-1003-FIRMA-01",
+    "id_solicitud": "SOL-1003",
+    "id_documento": "DOC-09",
+    "tipo_incidencia": "FIRMA_NO_VISIBLE",
+    "severidad": "ALTA",
+    "impacto": "Formulario sin firma física o digital visible no puede ser tramitado.",
+    "detalle": "No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.",
+    "evidencia_fuente": "Página 1 de SOL-1003_Formulario.pdf",
+    "accion_sugerida": "Revisar manualmente el documento para verificar existencia de firma.",
+    "estado_revision": "PENDIENTE_HUMANO",
+    "revisado_por": null,
+    "fecha_revision": null,
+    "comentario_revisor": null
+  }
+]

@@ -1,0 +1,14 @@
+# Entornos virtuales y dependencias
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+node_modules/
+
+# Archivos de sistema y logs
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": "2026-10-30T21:08:44.932432",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
+    "lote_id": "Lote_003",
+    "accion": "INICIO_LOTE",
+    "detalles": "Iniciando análisis para carpeta Drive 'Carpeta_Legal' (ID: drv_test_legal)"
+  },
+  {
+    "timestamp": "2026-10-30T21:08:44.932432",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
+    "lote_id": "Lote_003",
+    "accion": "LECTURA_RADICADO",
+    "detalles": "5 solicitudes leídas exitosamente."
+  },
+  {
+    "timestamp": "2026-10-30T21:08:44.932432",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
+    "lote_id": "Lote_003",
+    "accion": "COMPROBACION_LINKS",
+    "detalles": "18 enlaces de Drive evaluados."
+  },
+  {
+    "timestamp": "2026-10-30T21:08:44.932432",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
+    "lote_id": "Lote_003",
+    "accion": "NORMALIZACION",
+    "detalles": "Normalización completada preservando originales."
+  },
+  {
+    "timestamp": "2026-10-30T21:08:44.933200",
+    "actor": "analista.backoffice@fondodeempleados.org.co",
+    "lote_id": "Lote_003",
+    "accion": "REGLAS_EVALUADAS",
+    "detalles": "Evaluadas reglas POL-2026.1. 16 incidencias generadas."
+  }
+]

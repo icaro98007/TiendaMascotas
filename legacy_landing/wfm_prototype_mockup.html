@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototipo WFM - MVP Planeación de Capacidad (Sprint 1 Semana)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Transiciones suaves y scroll personalizado */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.5); }
+    .badge-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+  </style>
+</head>
+<body class="bg-[var(--background,#0f172a)] text-[var(--foreground,#f8fafc)] min-h-screen font-sans antialiased flex flex-col">
+
+  <!-- TOPBAR DE NAVEGACIÓN Y CONTEXTO -->
+  <header class="border-b border-[var(--border,#1e293b)] bg-[var(--card,#1e293b)]/80 backdrop-blur sticky top-0 z-30 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/20">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-[var(--foreground,#f8fafc)] leading-tight">WFM Capacity Planning MVP</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Sprint Semana 1</span>
+        </div>
+        <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Flujo determinista de planeación de capacidad y cuadrantes</p>
+      </div>
+    </div>
+
+    <!-- Indicador de Rol y Estado -->
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-[var(--muted-foreground,#94a3b8)]">Actor:</span>
+        <strong class="text-[var(--foreground,#f8fafc)] font-semibold">Planificador WFM</strong>
+      </div>
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+        <span class="text-[var(--muted-foreground,#94a3b8)]">BD:</span>
+        <span class="text-indigo-400 font-mono font-medium">PostgreSQL v16</span>
+      </div>
+      <button onclick="toggleDiagramDrawer()" class="px-3 py-1.5 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 font-medium transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+        <span>Ver Flujo Mermaid</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- STEPPER DE LAS 4 FASES DEL PROTOTIPO -->
+  <nav class="bg-[var(--card,#1e293b)]/40 border-b border-[var(--border,#1e293b)] px-6 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto gap-4">
+      
+      <!-- Paso 1 -->
+      <button onclick="navigateToPhase(1)" id="step-btn-1" class="phase-step flex items-center gap-3 group text-left transition p-2 rounded-lg cursor-pointer">
+        <div id="step-icon-1" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/30">1</div>
+        <div>
+          <p class="text-xs font-semibold text-indigo-400" id="step-label-1">FASE 1</p>
+          <p class="text-xs font-medium text-[var(--foreground,#f8fafc)]">Ingesta y Configuración</p>
+        </div>
+      </button>
+
+      <div class="h-0.5 flex-1 bg-[var(--border,#334155)] min-w-[30px]" id="step-line-1"></div>
+
+      <!-- Paso 2 -->
+      <button onclick="navigateToPhase(2)" id="step-btn-2" class="phase-step flex items-center gap-3 group text-left transition p-2 rounded-lg cursor-pointer opacity-70 hover:opacity-100">
+        <div id="step-icon-2" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] text-[var(--muted-foreground,#94a3b8)]">2</div>
+        <div>
+          <p class="text-xs font-semibold text-[var(--muted-foreground,#94a3b8)]" id="step-label-2">FASE 2</p>
+          <p class="text-xs font-medium text-[var(--muted-foreground,#94a3b8)]">Motor Determinista</p>
+        </div>
+      </button>
+
+      <div class="h-0.5 flex-1 bg-[var(--border,#334155)] min-w-[30px]" id="step-line-2"></div>
+
+      <!-- Paso 3 -->
+      <button onclick="navigateToPhase(3)" id="step-btn-3" class="phase-step flex items-center gap-3 group text-left transition p-2 rounded-lg cursor-pointer opacity-70 hover:opacity-100">
+        <div id="step-icon-3" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] text-[var(--muted-foreground,#94a3b8)]">3</div>
+        <div>
+          <p class="text-xs font-semibold text-[var(--muted-foreground,#94a3b8)]" id="step-label-3">FASE 3</p>
+          <p class="text-xs font-medium text-[var(--muted-foreground,#94a3b8)]">Interfaz de Revisión</p>
+        </div>
+      </button>
+
+      <div class="h-0.5 flex-1 bg-[var(--border,#334155)] min-w-[30px]" id="step-line-3"></div>
+
+      <!-- Paso 4 -->
+      <button onclick="navigateToPhase(4)" id="step-btn-4" class="phase-step flex items-center gap-3 group text-left transition p-2 rounded-lg cursor-pointer opacity-70 hover:opacity-100">
+        <div id="step-icon-4" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] text-[var(--muted-foreground,#94a3b8)]">4</div>
+        <div>
+          <p class="text-xs font-semibold text-[var(--muted-foreground,#94a3b8)]" id="step-label-4">FASE 4</p>
+          <p class="text-xs font-medium text-[var(--muted-foreground,#94a3b8)]">Aprobación y Salida</p>
+        </div>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL DINÁMICO -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- ========================================== -->
+    <!-- FASE 1: INGESTA Y CONFIGURACIÓN            -->
+    <!-- ========================================== -->
+    <div id="phase-1-content" class="space-y-6">
+      
+      <!-- Banner de Contexto de Fase 1 -->
+      <div class="bg-gradient-to-r from-blue-900/30 to-indigo-900/20 border border-blue-800/40 rounded-xl p-5 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-400">Diagrama Nodo: [U1] Planificador WFM ➔ [A1] Importación CSV ➔ [V1] Backend Validation</span>
+            </div>
+            <h2 class="text-lg font-bold text-[var(--foreground,#f8fafc)]">Entradas de Demanda & Configuración de Agentes</h2>
+            <p class="text-sm text-[var(--muted-foreground,#94a3b8)] max-w-3xl">
+              Carga el archivo con las llamadas esperadas y el AHT por intervalo. La validación backend verifica tipos de datos, valores nulos y claves duplicadas antes de habilitar el motor.
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="loadSampleValidCSV()" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Cargar CSV Válido
+            </button>
+            <button onclick="loadSampleInvalidCSV()" class="px-3.5 py-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              Simular Error Crítico (V1 ➔ E1)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Columna 1 & 2: Zona de Importación CSV y Vista Previa -->
+        <div class="lg:col-span-2 space-y-4">
+          
+          <!-- Dropzone CSV -->
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <h3 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">[A1] Archivo de Demanda Esperada (CSV)</h3>
+              </div>
+              <span id="csv-status-pill" class="text-xs px-2.5 py-0.5 rounded-full font-medium bg-slate-800 text-slate-400 border border-slate-700">Sin archivo</span>
+            </div>
+
+            <div id="dropzone-box" class="border-2 border-dashed border-[var(--border,#334155)] hover:border-indigo-500 rounded-xl p-6 text-center transition cursor-pointer bg-[var(--background,#0f172a)]/40" onclick="document.getElementById('file-input').click()">
+              <input type="file" id="file-input" class="hidden" accept=".csv" onchange="handleFileSelect(event)">
+              <div class="mx-auto w-12 h-12 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+              </div>
+              <p class="text-sm font-medium text-[var(--foreground,#f8fafc)]" id="dropzone-text">Arrastra el archivo CSV de pronóstico o haz clic para examinar</p>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1">Formato esperado: Fecha, Intervalo (30m), Volumen_Esperado, AHT_Segundos, Skill_Requerida</p>
+            </div>
+
+            <!-- Panel de Validación [V1] Backend Validation -->
+            <div id="validation-panel" class="mt-4 hidden p-4 rounded-xl border transition">
+              <!-- Renderizado dinámico vía JS -->
+            </div>
+
+            <!-- Tabla de Datos CSV Previsualización -->
+            <div id="csv-table-container" class="mt-4 hidden">
+              <div class="flex items-center justify-between pb-2">
+                <h4 class="text-xs font-bold text-[var(--muted-foreground,#94a3b8)] uppercase">Registros Procesados (<span id="csv-rows-count">0</span> intervalos)</h4>
+                <span class="text-xs text-indigo-400 font-mono">Semana 44 • Lunes - Domingo</span>
+              </div>
+              <div class="overflow-x-auto border border-[var(--border,#334155)] rounded-lg max-h-56">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-[var(--card,#1e293b)] text-[var(--muted-foreground,#94a3b8)] uppercase font-semibold sticky top-0 border-b border-[var(--border,#334155)]">
+                    <tr>
+                      <th class="p-2.5">Fila</th>
+                      <th class="p-2.5">Intervalo</th>
+                      <th class="p-2.5">Skill</th>
+                      <th class="p-2.5 text-right">Llamadas (Demanda)</th>
+                      <th class="p-2.5 text-right">AHT (Seg)</th>
+                      <th class="p-2.5 text-center">Estado Backend</th>
+                    </tr>
+                  </thead>
+                  <tbody id="csv-table-body" class="divide-y divide-[var(--border,#1e293b)] font-mono text-[var(--foreground,#f8fafc)]">
+                    <!-- Filas inyectadas por JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Acciones de Continuación Fase 1 -->
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button id="btn-goto-phase2" onclick="navigateToPhase(2)" disabled class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-md transition flex items-center gap-2">
+              <span>Continuar al Motor Determinista (Fase 2)</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Columna 3: Tablas Maestras PostgreSQL [BD] -->
+        <div class="space-y-4">
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                <h3 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">[BD] PostgreSQL: Maestros</h3>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded bg-purple-900/30 text-purple-300 border border-purple-700/40 font-mono">Conectado</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mb-4">
+              Datos precargados del sistema que restringen la asignación determinista.
+            </p>
+
+            <!-- Agentes Disponibles -->
+            <div class="space-y-3">
+              <div class="p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-medium text-[var(--foreground,#f8fafc)] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Plantilla Activa (Agentes)
+                  </span>
+                  <span class="font-bold text-indigo-400">12 Agentes</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground,#94a3b8)]">
+                  8 Full-Time (40h/sem) • 4 Part-Time (20h/sem)
+                </div>
+              </div>
+
+              <!-- Skills Registrados -->
+              <div class="p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-medium text-[var(--foreground,#f8fafc)] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    Skills Parametrizados
+                  </span>
+                  <span class="font-bold text-emerald-400">3 Habilidades</span>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[11px] border border-blue-500/20 font-mono">Soporte_N1</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[11px] border border-emerald-500/20 font-mono">Facturación</span>
+                  <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[11px] border border-purple-500/20 font-mono">VIP_Inglés</span>
+                </div>
+              </div>
+
+              <!-- Reglas Obligatorias -->
+              <div class="p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-medium text-[var(--foreground,#f8fafc)] flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Reglas Duras (Hard Constraints)
+                  </span>
+                  <span class="font-bold text-amber-400">Activas</span>
+                </div>
+                <ul class="text-[11px] text-[var(--muted-foreground,#94a3b8)] space-y-1 list-disc list-inside">
+                  <li>Máximo 40h semanales por agente FT</li>
+                  <li>Descanso mínimo de 11h entre turnos</li>
+                  <li>Ventana de comida obligatoria a mitad de turno</li>
+                  <li>Asignación exclusiva según Skill requerida</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FASE 2: MOTOR DETERMINISTA DE PLANIFICACIÓN -->
+    <!-- ========================================== -->
+    <div id="phase-2-content" class="hidden space-y-6">
+      
+      <!-- Banner Motor -->
+      <div class="bg-gradient-to-r from-emerald-950/40 to-teal-950/30 border border-emerald-800/40 rounded-xl p-5 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Diagrama Fase 2: [M1] ➔ [M2] ➔ [M3] ➔ [M4]</span>
+            </div>
+            <h2 class="text-lg font-bold text-[var(--foreground,#f8fafc)]">Motor Determinista de Planificación</h2>
+            <p class="text-sm text-[var(--muted-foreground,#94a3b8)] max-w-3xl">
+              Cálculo secuencial y matemático sin heurísticas oscuras: cálculo de FTEs teóricos por Erlang C simplificado, selección de plantillas de turnos, asignación de plantilla y cálculo de cobertura neta.
+            </p>
+          </div>
+          <div>
+            <button id="btn-run-engine" onclick="runDeterministicEngine()" class="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-2 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>Ejecutar Algoritmo Determinista</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Pasos del Motor (M1 a M4) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- M1 -->
+        <div id="card-m1" class="engine-step-card bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-slate-400" id="badge-m1">M1</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-600" id="dot-m1"></span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">1. Capacidad Requerida</h4>
+          <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1">Erlang C simplificado por intervalo (Llamadas × AHT / Intervalo).</p>
+          <div class="mt-3 pt-3 border-t border-[var(--border,#334155)] text-xs text-[var(--muted-foreground,#94a3b8)] font-mono" id="metric-m1">
+            Esperando ejecución...
+          </div>
+        </div>
+
+        <!-- M2 -->
+        <div id="card-m2" class="engine-step-card bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 transition-all opacity-60">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-slate-400" id="badge-m2">M2</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-600" id="dot-m2"></span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">2. Plantillas de Turno</h4>
+          <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1">Filtro de ventanas operativas (T1 8h, T2 8.5h, Part-time 4h).</p>
+          <div class="mt-3 pt-3 border-t border-[var(--border,#334155)] text-xs text-[var(--muted-foreground,#94a3b8)] font-mono" id="metric-m2">
+            Esperando ejecución...
+          </div>
+        </div>
+
+        <!-- M3 -->
+        <div id="card-m3" class="engine-step-card bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 transition-all opacity-60">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-slate-400" id="badge-m3">M3</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-600" id="dot-m3"></span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">3. Asignación de Agentes</h4>
+          <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1">Matching determinista respetando skills y descansos legales.</p>
+          <div class="mt-3 pt-3 border-t border-[var(--border,#334155)] text-xs text-[var(--muted-foreground,#94a3b8)] font-mono" id="metric-m3">
+            Esperando ejecución...
+          </div>
+        </div>
+
+        <!-- M4 -->
+        <div id="card-m4" class="engine-step-card bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 transition-all opacity-60">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-slate-400" id="badge-m4">M4</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-600" id="dot-m4"></span>
+          </div>
+          <h4 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">4. Cálculo de Cobertura</h4>
+          <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1">Balance final: Capacidad asignada vs Demanda esperada.</p>
+          <div class="mt-3 pt-3 border-t border-[var(--border,#334155)] text-xs text-[var(--muted-foreground,#94a3b8)] font-mono" id="metric-m4">
+            Esperando ejecución...
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Consola de Logs del Motor en Vivo -->
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[var(--border,#334155)]">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--foreground,#f8fafc)]">Consola de Ejecución Determinista</h4>
+          </div>
+          <span id="engine-timer" class="text-xs font-mono text-slate-400">Estado: Listo</span>
+        </div>
+        <div id="engine-console" class="mt-3 h-48 overflow-y-auto font-mono text-xs text-slate-300 space-y-1 bg-[var(--background,#0f172a)]/80 p-3 rounded-lg border border-[var(--border,#1e293b)]">
+          <div class="text-slate-500">// Presiona "Ejecutar Algoritmo Determinista" para iniciar el pipeline.</div>
+        </div>
+      </div>
+
+      <!-- Navegación a Fase 3 -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="navigateToPhase(1)" class="px-4 py-2 rounded-lg bg-[var(--card,#1e293b)] hover:bg-[var(--border,#334155)] text-xs font-semibold text-[var(--foreground,#f8fafc)] border border-[var(--border,#334155)] transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Volver a Ingesta
+        </button>
+
+        <button id="btn-goto-phase3" onclick="navigateToPhase(3)" disabled class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-md transition flex items-center gap-2">
+          <span>Abrir Interfaz de Revisión (Fase 3)</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FASE 3: INTERFAZ DE REVISIÓN               -->
+    <!-- ========================================== -->
+    <div id="phase-3-content" class="hidden space-y-6">
+      
+      <!-- Encabezado con tabs para UI1, UI2, UI3 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border,#1e293b)] pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Fase 3 • Nodo: [M4] ➔ [UI1, UI2, UI3] ➔ [R1] Planificador</span>
+          </div>
+          <h2 class="text-lg font-bold text-[var(--foreground,#f8fafc)]">Revisión de Capacidad y Cumplimiento</h2>
+        </div>
+
+        <!-- Botones de Vistas UI1, UI2, UI3 -->
+        <div class="flex items-center gap-1 bg-[var(--card,#1e293b)] p-1 rounded-xl border border-[var(--border,#334155)]">
+          <button onclick="switchReviewTab('grid')" id="tab-btn-grid" class="review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            [UI1] Malla Generada
+          </button>
+          <button onclick="switchReviewTab('coverage')" id="tab-btn-coverage" class="review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-[var(--muted-foreground,#94a3b8)] hover:text-white flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            [UI2] Matriz de Cobertura
+          </button>
+          <button onclick="switchReviewTab('alerts')" id="tab-btn-alerts" class="review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-[var(--muted-foreground,#94a3b8)] hover:text-white flex items-center gap-1.5 relative">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            [UI3] Alertas
+            <span id="alerts-badge-count" class="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30">1</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= UI1: MALLA GENERADA ================= -->
+      <div id="view-ui1-grid" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+            Asignaciones de turnos para los 12 agentes disponibles (Semana 44). Puedes reasignar o modificar turnos directamente.
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> Turno Mañana (08:00 - 16:30)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-blue-500"></span> Turno Tarde (12:00 - 20:30)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-purple-500"></span> Part-Time (09:00 - 13:00)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-600"></span> Libre</span>
+          </div>
+        </div>
+
+        <div class="border border-[var(--border,#334155)] rounded-xl overflow-hidden bg-[var(--card,#1e293b)]">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[var(--background,#0f172a)]/80 text-[var(--muted-foreground,#94a3b8)] uppercase border-b border-[var(--border,#334155)]">
+                <tr>
+                  <th class="p-3">Agente</th>
+                  <th class="p-3">Skill Principal</th>
+                  <th class="p-3 text-center">Tipo</th>
+                  <th class="p-3 text-center">Lun</th>
+                  <th class="p-3 text-center">Mar</th>
+                  <th class="p-3 text-center">Mié</th>
+                  <th class="p-3 text-center">Jue</th>
+                  <th class="p-3 text-center">Vie</th>
+                  <th class="p-3 text-center">Sáb</th>
+                  <th class="p-3 text-center">Dom</th>
+                  <th class="p-3 text-right">Horas Total</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-grid-tbody" class="divide-y divide-[var(--border,#1e293b)]">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= UI2: MATRIZ DE COBERTURA ================= -->
+      <div id="view-ui2-coverage" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+            Comparativa directa de <strong>Capacidad Requerida vs Capacidad Asignada</strong> por intervalo de servicio (Lunes típico).
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500/80"></span> Cobertura Óptima</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500/80"></span> Superávit (+2)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-500/80"></span> Déficit Crítico (-1 o más)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="coverage-cards-container">
+          <!-- Tarjetas de intervalos inyectadas por JS -->
+        </div>
+
+        <div class="border border-[var(--border,#334155)] rounded-xl p-5 bg-[var(--card,#1e293b)]">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--foreground,#f8fafc)] mb-3">Gráfico Visual de Brecha (Capacidad vs Demanda)</h4>
+          <div class="space-y-3" id="coverage-bars-container">
+            <!-- Barras generadas por JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= UI3: ALERTAS DE RESTRICCIONES ================= -->
+      <div id="view-ui3-alerts" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-semibold text-[var(--foreground,#f8fafc)]">Motor de Validación de Reglas Obligatorias</h4>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Si existen violaciones de reglas duras pendientes, el nodo [V2] bloqueará la aprobación.</p>
+          </div>
+          <button onclick="resolveAllAlerts()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition">
+            Auto-resolver / Ajustar Restricciones
+          </button>
+        </div>
+
+        <div class="space-y-3" id="alerts-list-container">
+          <!-- Inyectado por JS -->
+        </div>
+      </div>
+
+      <!-- Navegación a Fase 4 -->
+      <div class="flex items-center justify-between pt-4 border-t border-[var(--border,#1e293b)]">
+        <button onclick="navigateToPhase(2)" class="px-4 py-2 rounded-lg bg-[var(--card,#1e293b)] hover:bg-[var(--border,#334155)] text-xs font-semibold text-[var(--foreground,#f8fafc)] border border-[var(--border,#334155)] transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Volver a Motor Determinista
+        </button>
+
+        <button onclick="navigateToPhase(4)" class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-2">
+          <span>Proceder a Aprobación y Salida (Fase 4)</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FASE 4: CICLO DE VIDA Y EXPORTACIÓN        -->
+    <!-- ========================================== -->
+    <div id="phase-4-content" class="hidden space-y-6">
+      
+      <!-- Banner Fase 4 -->
+      <div class="bg-gradient-to-r from-purple-950/40 to-slate-900 border border-purple-800/40 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Diagrama Fase 4: [R1] ➔ [V2] ¿Cumple reglas? ➔ [E2] Bloqueo ó [AP] Aprobación ➔ [BD2] ➔ [EX] Exportación</span>
+        </div>
+        <h2 class="text-lg font-bold text-[var(--foreground,#f8fafc)] mt-1">Aprobación Transaccional & Exportación</h2>
+        <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">
+          Paso final de auditoría. Si no hay violaciones de reglas obligatorias, el planificador sella la versión oficial en PostgreSQL y exporta el archivo CSV final para nómina.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Tarjeta de Verificación V2 -->
+        <div class="lg:col-span-2 space-y-5">
+          
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-5">
+            <div class="flex items-center justify-between pb-3 border-b border-[var(--border,#334155)]">
+              <h3 class="text-sm font-bold text-[var(--foreground,#f8fafc)] flex items-center gap-2">
+                <span class="text-amber-400 font-mono">[V2]</span>
+                Evaluación de Reglas Obligatorias
+              </h3>
+              <span id="v2-status-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                100% Conforme
+              </span>
+            </div>
+
+            <!-- Lista de checklist V2 -->
+            <div class="mt-4 space-y-3" id="v2-checklist">
+              <div class="flex items-center justify-between p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">✓</div>
+                  <span class="text-xs font-medium text-[var(--foreground,#f8fafc)]">Sin solapamiento de descanso legal (&ge;11h)</span>
+                </div>
+                <span class="text-xs text-emerald-400 font-mono">Cumplido</span>
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">✓</div>
+                  <span class="text-xs font-medium text-[var(--foreground,#f8fafc)]">Tope de 40 horas semanales por agente full-time</span>
+                </div>
+                <span class="text-xs text-emerald-400 font-mono">Cumplido</span>
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-lg bg-[var(--background,#0f172a)]/60 border border-[var(--border,#334155)]" id="checklist-item-alerts">
+                <div class="flex items-center gap-2.5">
+                  <div id="checklist-alert-icon" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">✓</div>
+                  <span class="text-xs font-medium text-[var(--foreground,#f8fafc)]" id="checklist-alert-text">Sin alertas críticas de déficit de cobertura no resueltas</span>
+                </div>
+                <span id="checklist-alert-status" class="text-xs text-emerald-400 font-mono">0 Pendientes</span>
+              </div>
+            </div>
+
+            <!-- Caja de Estado E2 Bloqueo vs AP Aprobación -->
+            <div id="v2-decision-box" class="mt-5 p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-emerald-400">V2 = SÍ: Habilitado para Aprobación Transaccional</h4>
+                  <p class="text-xs text-slate-300 mt-1">Todas las reglas obligatorias se han satisfecho. Puedes confirmar la transacción para crear la versión formal en PostgreSQL.</p>
+                  
+                  <div class="mt-3 flex gap-2">
+                    <button id="btn-approve-schedule" onclick="approvePlanTransaction()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      Aprobar y Crear Versión Oficial [AP]
+                    </button>
+                    <button onclick="toggleSimulateBlock()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 font-medium transition">
+                      Simular Bloqueo [E2]
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Historial de Versiones [BD2] -->
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--foreground,#f8fafc)] flex items-center gap-2">
+                <span class="text-purple-400 font-mono">[BD2]</span>
+                Registro Transaccional de Versiones Aprobadas
+              </h4>
+              <span class="text-xs text-[var(--muted-foreground,#94a3b8)]">Tabla: <code class="text-purple-400">wfm_schedule_versions</code></span>
+            </div>
+
+            <div class="overflow-x-auto border border-[var(--border,#334155)] rounded-lg">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] uppercase font-semibold">
+                  <tr>
+                    <th class="p-2.5">Versión</th>
+                    <th class="p-2.5">Fecha / Hora</th>
+                    <th class="p-2.5">Aprobado Por</th>
+                    <th class="p-2.5">Hash SHA-256</th>
+                    <th class="p-2.5 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="versions-tbody" class="divide-y divide-[var(--border,#1e293b)] font-mono text-[var(--foreground,#f8fafc)]">
+                  <tr>
+                    <td class="p-2.5 text-slate-500 italic" colspan="5">Aún no se ha consolidado ninguna versión en esta sesión.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Columna Exportación CSV [EX] -->
+        <div class="space-y-4">
+          
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <h3 class="text-sm font-bold text-[var(--foreground,#f8fafc)]">[EX] Exportación de Turnos (CSV)</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mb-4">
+                Genera el archivo final aprobado para el sistema de control de asistencia, biometría y nómina.
+              </p>
+
+              <div class="p-4 rounded-xl bg-[var(--background,#0f172a)]/80 border border-[var(--border,#334155)] space-y-2 mb-4">
+                <div class="flex justify-between text-xs">
+                  <span class="text-[var(--muted-foreground,#94a3b8)]">Formato:</span>
+                  <span class="text-[var(--foreground,#f8fafc)] font-mono">CSV (UTF-8, delimitado por comas)</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-[var(--muted-foreground,#94a3b8)]">Turnos Asignados:</span>
+                  <span class="text-emerald-400 font-mono font-bold" id="export-count">60 turnos</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-[var(--muted-foreground,#94a3b8)]">Sello Transaccional:</span>
+                  <span class="text-purple-400 font-mono" id="export-seal">Pendiente de firma</span>
+                </div>
+              </div>
+            </div>
+
+            <button id="btn-export-csv" onclick="downloadApprovedCSV()" disabled class="w-full py-3 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Descargar CSV Turnos Aprobados</span>
+            </button>
+          </div>
+
+          <!-- Resumen de Ciclo de Vida -->
+          <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-xs space-y-2 text-slate-400">
+            <h5 class="font-bold text-slate-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Cierre del Sprint de 1 Semana
+            </h5>
+            <p>
+              El flujo implementa de forma íntegra las recomendaciones de la auditoría técnica: sin optimizadores probabilísticos pesados, arquitectura 100% determinista, y validación estricta en dos compuertas ([V1] y [V2]).
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL / DRAWER DEL DIAGRAMA MERMAID ORIGINAL -->
+  <div id="diagram-drawer" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-[var(--border,#334155)] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+          <h3 class="text-sm font-bold text-[var(--foreground,#f8fafc)]">Flujo del Prototipo WFM - Sprint de 1 Semana (Arquitectura Mermaid)</h3>
+        </div>
+        <button onclick="toggleDiagramDrawer()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4">
+        
+        <!-- Fases visuales resumidas del diagrama -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-blue-950/40 border border-blue-800/60">
+            <span class="font-bold text-blue-300 block mb-1">Fase 1: Ingesta</span>
+            <ul class="text-slate-300 space-y-1 list-disc list-inside">
+              <li>[U1] Planificador</li>
+              <li>[A1] CSV Demanda</li>
+              <li>[BD] PostgreSQL</li>
+              <li>[V1] Backend Validation</li>
+              <li>[E1] Rechazo por fila</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60">
+            <span class="font-bold text-emerald-300 block mb-1">Fase 2: Motor</span>
+            <ul class="text-slate-300 space-y-1 list-disc list-inside">
+              <li>[M1] Capacidad req.</li>
+              <li>[M2] Plantillas turno</li>
+              <li>[M3] Asignar agentes</li>
+              <li>[M4] Cobertura final</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-lg bg-indigo-950/40 border border-indigo-800/60">
+            <span class="font-bold text-indigo-300 block mb-1">Fase 3: Revisión</span>
+            <ul class="text-slate-300 space-y-1 list-disc list-inside">
+              <li>[UI1] Malla generada</li>
+              <li>[UI2] Matriz cobertura</li>
+              <li>[UI3] Alertas</li>
+              <li>[R1] Interacción WFM</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-lg bg-purple-950/40 border border-purple-800/60">
+            <span class="font-bold text-purple-300 block mb-1">Fase 4: Salida</span>
+            <ul class="text-slate-300 space-y-1 list-disc list-inside">
+              <li>[V2] ¿Cumple reglas?</li>
+              <li>[E2] Bloqueo ajuste</li>
+              <li>[AP] Aprobación vers.</li>
+              <li>[BD2] Commit PostgreSQL</li>
+              <li>[EX] Export CSV</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre">
+graph TD
+    %% Fase 1: Ingesta y Configuración
+    U1((Planificador WFM)) -->|Sube pronóstico| A1[Importación CSV Demanda esperada]
+    BD[(PostgreSQL: Agentes, Skills, Reglas)] --> M1
+    A1 --> V1{Validación Backend: Tipos, vacíos, duplicados}
+    V1 -- Errores críticos --> E1[Rechazar y mostrar errores por fila]
+    
+    %% Fase 2: Motor Determinista
+    V1 -- CSV Válido --> M1[1. Cálculo de Capacidad Requerida]
+    M1 --> M2[2. Filtro de Plantillas de Turno]
+    M2 --> M3[3. Asignación de Agentes con restricciones]
+    M3 --> M4[4. Cálculo de Cobertura Final]
+    
+    %% Fase 3: Visualización e Interacción
+    M4 --> UI1[Vista: Malla Generada]
+    M4 --> UI2[Vista: Matriz de Cobertura]
+    M4 --> UI3[Vista: Alertas de Restricciones]
+    UI1 --> R1((Planificador WFM))
+    
+    %% Fase 4: Ciclo de Vida y Exportación
+    R1 --> V2{¿Cumple reglas obligatorias?}
+    V2 -- No --> E2[Bloqueo de Aprobación - Requiere ajuste]
+    V2 -- Sí --> AP[Aprobación Transaccional - Versión]
+    AP --> BD2[(PostgreSQL: Guardar Versión)]
+    BD2 --> EX[Exportación CSV Turnos aprobados]
+        </div>
+      </div>
+      <div class="p-4 border-t border-[var(--border,#334155)] flex justify-end">
+        <button onclick="toggleDiagramDrawer()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DEL PROTOTIPO NAVEGABLE COMPLETO -->
+  <script>
+    // ESTADO GLOBAL DE LA MAQUETA NAVEGABLE
+    const state = {
+      currentPhase: 1,
+      csvLoaded: false,
+      csvHasErrors: false,
+      engineRan: false,
+      activeReviewTab: 'grid',
+      unresolvedAlertsCount: 1,
+      isBlockedByV2: false,
+      approvedVersions: [],
+      
+      // Agentes mock en PostgreSQL
+      agents: [
+        { id: 1, name: "Juan Pérez", skill: "Soporte_N1", type: "Full-Time (40h)", shifts: ["08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "Libre", "Libre"], hours: 40 },
+        { id: 2, name: "María Gómez", skill: "Facturación", type: "Full-Time (40h)", shifts: ["12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "Libre", "Libre"], hours: 40 },
+        { id: 3, name: "Carlos Ruiz", skill: "Soporte_N1", type: "Full-Time (40h)", shifts: ["08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "12:00 - 20:30", "12:00 - 20:30", "Libre", "Libre"], hours: 40 },
+        { id: 4, name: "Andrea Torres", skill: "VIP_Inglés", type: "Full-Time (40h)", shifts: ["08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "Libre", "Libre"], hours: 40 },
+        { id: 5, name: "Lucía Morales", skill: "Facturación", type: "Part-Time (20h)", shifts: ["09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "Libre", "Libre"], hours: 20 },
+        { id: 6, name: "David Castro", skill: "Soporte_N1", type: "Part-Time (20h)", shifts: ["09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "09:00 - 13:00", "Libre", "Libre"], hours: 20 },
+        { id: 7, name: "Elena Ramos", skill: "Soporte_N1", type: "Full-Time (40h)", shifts: ["08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "08:00 - 16:30", "Libre", "Libre"], hours: 40 },
+        { id: 8, name: "Javier Ortiz", skill: "VIP_Inglés", type: "Full-Time (40h)", shifts: ["12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "12:00 - 20:30", "Libre", "Libre"], hours: 40 }
+      ],
+
+      // Intervalos de Cobertura
+      intervals: [
+        { time: "08:00 - 09:00", calls: 45, aht: 310, req: 4, assigned: 4, diff: 0, status: "optimal" },
+        { time: "09:00 - 10:00", calls: 78, aht: 320, req: 7, assigned: 7, diff: 0, status: "optimal" },
+        { time: "10:00 - 11:00", calls: 92, aht: 330, req: 8, assigned: 8, diff: 0, status: "optimal" },
+        { time: "11:00 - 12:00", calls: 85, aht: 315, req: 7, assigned: 8, diff: 1, status: "surplus" },
+        { time: "12:00 - 13:00", calls: 110, aht: 340, req: 9, assigned: 8, diff: -1, status: "deficit" },
+        { time: "13:00 - 14:00", calls: 95, aht: 325, req: 8, assigned: 8, diff: 0, status: "optimal" },
+        { time: "14:00 - 15:00", calls: 88, aht: 320, req: 7, assigned: 7, diff: 0, status: "optimal" },
+        { time: "15:00 - 16:00", calls: 70, aht: 310, req: 6, assigned: 6, diff: 0, status: "optimal" }
+      ],
+
+      // Alertas activas
+      alerts: [
+        {
+          id: 1,
+          type: "critical",
+          rule: "Regla de Cobertura Mínima",
+          description: "Déficit de 1 agente en intervalo 12:00 - 13:00 para la Skill 'Facturación' (Hora pico de almuerzo).",
+          resolution: "Reasignar inicio de turno de Lucía Morales o convocar 1h extra voluntaria.",
+          resolved: false
+        }
+      ]
+    };
+
+    // NAVEGACIÓN ENTRE FASES
+    function navigateToPhase(phaseNumber) {
+      if (phaseNumber === 2 && !state.csvLoaded) {
+        alert("Primero debes cargar y validar un CSV de Demanda en la Fase 1.");
+        return;
+      }
+      if (phaseNumber >= 3 && !state.engineRan) {
+        alert("Debes ejecutar el Motor Determinista en la Fase 2 antes de revisar los cuadrantes.");
+        return;
+      }
+
+      state.currentPhase = phaseNumber;
+
+      // Ocultar todas las fases
+      for (let i = 1; i <= 4; i++) {
+        const content = document.getElementById(`phase-${i}-content`);
+        if (content) content.classList.add('hidden');
+        
+        const btn = document.getElementById(`step-btn-${i}`);
+        const icon = document.getElementById(`step-icon-${i}`);
+        const label = document.getElementById(`step-label-${i}`);
+
+        if (btn && icon && label) {
+          if (i === phaseNumber) {
+            btn.classList.remove('opacity-70');
+            icon.className = "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/30";
+            label.className = "text-xs font-semibold text-indigo-400";
+          } else if (i < phaseNumber) {
+            btn.classList.remove('opacity-70');
+            icon.className = "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-600 text-white";
+            icon.innerHTML = "✓";
+            label.className = "text-xs font-semibold text-emerald-400";
+          } else {
+            btn.classList.add('opacity-70');
+            icon.className = "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] text-[var(--muted-foreground,#94a3b8)]";
+            icon.innerHTML = i;
+            label.className = "text-xs font-semibold text-[var(--muted-foreground,#94a3b8)]";
+          }
+        }
+      }
+
+      // Mostrar fase seleccionada
+      document.getElementById(`phase-${phaseNumber}-content`).classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // FASE 1: CARGA DE ARCHIVOS Y VALIDACIÓN
+    function loadSampleValidCSV() {
+      state.csvLoaded = true;
+      state.csvHasErrors = false;
+
+      document.getElementById('csv-status-pill').className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+      document.getElementById('csv-status-pill').textContent = "CSV Válido [V1 Superado]";
+      document.getElementById('dropzone-text').innerHTML = "Archivo cargado: <strong class='text-emerald-400'>forecast_demanda_semana44.csv</strong>";
+
+      // Render de validación
+      const valPanel = document.getElementById('validation-panel');
+      valPanel.className = "mt-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20";
+      valPanel.classList.remove('hidden');
+      valPanel.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-xs font-bold">✓</div>
+          <div>
+            <h4 class="text-xs font-bold text-emerald-400">[V1 Backend Validation] Validación Exitosa (0 Errores)</h4>
+            <p class="text-xs text-slate-300 mt-0.5">336 intervalos parseados correctamente. Tipos enteros validados, sin nulos, sin claves duplicadas de tiempo.</p>
+          </div>
+        </div>
+      `;
+
+      // Poblar tabla
+      renderSampleCSVRows(false);
+      document.getElementById('btn-goto-phase2').removeAttribute('disabled');
+    }
+
+    function loadSampleInvalidCSV() {
+      state.csvLoaded = false;
+      state.csvHasErrors = true;
+
+      document.getElementById('csv-status-pill').className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20";
+      document.getElementById('csv-status-pill').textContent = "Rechazado [E1 Errores por Fila]";
+      document.getElementById('dropzone-text').innerHTML = "Archivo cargado con fallos: <strong class='text-rose-400'>forecast_corrupto_demanda.csv</strong>";
+
+      // Render de error E1
+      const valPanel = document.getElementById('validation-panel');
+      valPanel.className = "mt-4 p-4 rounded-xl border border-rose-500/30 bg-rose-950/20";
+      valPanel.classList.remove('hidden');
+      valPanel.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 text-xs font-bold">✕</div>
+          <div>
+            <h4 class="text-xs font-bold text-rose-400">[V1 ➔ E1] Validación Fallida: 3 Errores Críticos Detectados</h4>
+            <ul class="text-xs text-rose-300 mt-1 space-y-0.5 list-disc list-inside">
+              <li><strong>Fila 4:</strong> Valor negativo en llamadas esperadas (<code class="bg-black/40 px-1 rounded">-15</code>).</li>
+              <li><strong>Fila 12:</strong> Formato de intervalo inválido (<code class="bg-black/40 px-1 rounded">25:00</code> fuera de rango).</li>
+              <li><strong>Fila 27:</strong> Skill desconocida <code class="bg-black/40 px-1 rounded">'Soporte_N3_Cobranzas'</code> no existe en PostgreSQL.</li>
+            </ul>
+            <p class="text-xs text-slate-400 mt-2">El motor determinista fue bloqueado de acuerdo con la especificación de arquitectura hasta que se proporcione un CSV íntegro.</p>
+          </div>
+        </div>
+      `;
+
+      renderSampleCSVRows(true);
+      document.getElementById('btn-goto-phase2').setAttribute('disabled', 'true');
+    }
+
+    function renderSampleCSVRows(hasErrors) {
+      const tbody = document.getElementById('csv-table-body');
+      document.getElementById('csv-table-container').classList.remove('hidden');
+      document.getElementById('csv-rows-count').textContent = hasErrors ? "6 (Muestra con fallos)" : "8 (Muestra Lunes 08:00 - 16:00)";
+
+      if (hasErrors) {
+        tbody.innerHTML = `
+          <tr class="bg-rose-900/10 hover:bg-slate-800/50">
+            <td class="p-2.5 text-rose-400">#4</td>
+            <td class="p-2.5">2026-11-02 09:30</td>
+            <td class="p-2.5 text-blue-400">Soporte_N1</td>
+            <td class="p-2.5 text-right font-bold text-rose-400">-15 (Inválido)</td>
+            <td class="p-2.5 text-right">310</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px]">Error: Tipo</span></td>
+          </tr>
+          <tr class="bg-rose-900/10 hover:bg-slate-800/50">
+            <td class="p-2.5 text-rose-400">#12</td>
+            <td class="p-2.5 text-rose-400">2026-11-02 25:00</td>
+            <td class="p-2.5 text-emerald-400">Facturación</td>
+            <td class="p-2.5 text-right">45</td>
+            <td class="p-2.5 text-right">290</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px]">Error: Formato</span></td>
+          </tr>
+          <tr class="bg-rose-900/10 hover:bg-slate-800/50">
+            <td class="p-2.5 text-rose-400">#27</td>
+            <td class="p-2.5">2026-11-02 14:00</td>
+            <td class="p-2.5 text-rose-400">Soporte_N3_Cobranzas</td>
+            <td class="p-2.5 text-right">60</td>
+            <td class="p-2.5 text-right">300</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px]">FK No Existe</span></td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = `
+          <tr class="hover:bg-slate-800/50">
+            <td class="p-2.5 text-slate-400">#1</td>
+            <td class="p-2.5">2026-11-02 08:00</td>
+            <td class="p-2.5 text-blue-400">Soporte_N1</td>
+            <td class="p-2.5 text-right">45</td>
+            <td class="p-2.5 text-right">310</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Válido</span></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50">
+            <td class="p-2.5 text-slate-400">#2</td>
+            <td class="p-2.5">2026-11-02 09:00</td>
+            <td class="p-2.5 text-blue-400">Soporte_N1</td>
+            <td class="p-2.5 text-right">78</td>
+            <td class="p-2.5 text-right">320</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Válido</span></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50">
+            <td class="p-2.5 text-slate-400">#3</td>
+            <td class="p-2.5">2026-11-02 10:00</td>
+            <td class="p-2.5 text-emerald-400">Facturación</td>
+            <td class="p-2.5 text-right">92</td>
+            <td class="p-2.5 text-right">330</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Válido</span></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50">
+            <td class="p-2.5 text-slate-400">#4</td>
+            <td class="p-2.5">2026-11-02 11:00</td>
+            <td class="p-2.5 text-emerald-400">Facturación</td>
+            <td class="p-2.5 text-right">85</td>
+            <td class="p-2.5 text-right">315</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Válido</span></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50">
+            <td class="p-2.5 text-slate-400">#5</td>
+            <td class="p-2.5">2026-11-02 12:00</td>
+            <td class="p-2.5 text-purple-400">VIP_Inglés</td>
+            <td class="p-2.5 text-right">110</td>
+            <td class="p-2.5 text-right">340</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Válido</span></td>
+          </tr>
+        `;
+      }
+    }
+
+    function handleFileSelect(evt) {
+      const file = evt.target.files[0];
+      if (file) {
+        if (file.name.toLowerCase().includes("error") || file.name.toLowerCase().includes("corrupt")) {
+          loadSampleInvalidCSV();
+        } else {
+          loadSampleValidCSV();
+        }
+      }
+    }
+
+    // FASE 2: MOTOR DETERMINISTA SIMULADOR
+    function runDeterministicEngine() {
+      const btn = document.getElementById('btn-run-engine');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      const consoleBox = document.getElementById('engine-console');
+      consoleBox.innerHTML = '';
+      
+      const log = (msg, color = "text-slate-300") => {
+        const time = new Date().toLocaleTimeString();
+        consoleBox.innerHTML += `<div class="${color}"><span class="text-slate-500">[${time}]</span> ${msg}</div>`;
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+      };
+
+      log("🚀 Iniciando Motor Determinista de Planeación WFM (Semana 44)...", "text-emerald-400 font-bold");
+
+      // Paso 1
+      setTimeout(() => {
+        log("▶ [M1] Calculando Capacidad Requerida por intervalo (336 intervalos de 30m)...");
+        document.getElementById('badge-m1').className = "text-xs font-mono font-bold text-emerald-400";
+        document.getElementById('dot-m1').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 badge-pulse";
+        document.getElementById('metric-m1').innerHTML = "Erlang C: <span class='text-emerald-400 font-bold'>57.4 FTEs</span> req total";
+        log("✔ [M1] Cálculo completado: Demanda pico en 12:00-13:00 (Req: 9 FTEs).", "text-emerald-300");
+      }, 500);
+
+      // Paso 2
+      setTimeout(() => {
+        log("▶ [M2] Filtrando Plantillas de Turnos Permitidas...");
+        document.getElementById('card-m2').classList.remove('opacity-60');
+        document.getElementById('badge-m2').className = "text-xs font-mono font-bold text-emerald-400";
+        document.getElementById('dot-m2').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 badge-pulse";
+        document.getElementById('metric-m2').innerHTML = "Turnos: <span class='text-emerald-400 font-bold'>3 Plantillas</span> válidas";
+        log("✔ [M2] Plantillas aplicadas: Mañana (8.5h), Tarde (8.5h) y Refuerzo Part-Time (4h).", "text-emerald-300");
+      }, 1200);
+
+      // Paso 3
+      setTimeout(() => {
+        log("▶ [M3] Ejecutando Asignación de Agentes con Restricciones Duras...");
+        document.getElementById('card-m3').classList.remove('opacity-60');
+        document.getElementById('badge-m3').className = "text-xs font-mono font-bold text-emerald-400";
+        document.getElementById('dot-m3').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 badge-pulse";
+        document.getElementById('metric-m3').innerHTML = "Asignados: <span class='text-emerald-400 font-bold'>8/8 Agentes</span> cuadrantes";
+        log("✔ [M3] Restricciones respetadas: 40h máx, 11h descanso. Match de Skill completado.", "text-emerald-300");
+      }, 2000);
+
+      // Paso 4
+      setTimeout(() => {
+        log("▶ [M4] Calculando Cobertura Neta Final (Asignado vs Demanda)...");
+        document.getElementById('card-m4').classList.remove('opacity-60');
+        document.getElementById('badge-m4').className = "text-xs font-mono font-bold text-emerald-400";
+        document.getElementById('dot-m4').className = "w-2.5 h-2.5 rounded-full bg-emerald-400 badge-pulse";
+        document.getElementById('metric-m4').innerHTML = "Cobertura Neta: <span class='text-amber-400 font-bold'>98.2%</span> (1 déficit)";
+        log("⚠ [M4] Alerta detectada: Déficit de -1 en 12:00-13:00. Canalizando a Fase 3.", "text-amber-400 font-bold");
+        log("✨ Motor Determinista completado exitosamente en 1,480ms.", "text-emerald-400 font-bold");
+
+        state.engineRan = true;
+        document.getElementById('btn-goto-phase3').removeAttribute('disabled');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        renderPhase3Views();
+      }, 2800);
+    }
+
+    // FASE 3: INTERFAZ DE REVISIÓN Y TAB NAVIGATION
+    function switchReviewTab(tabName) {
+      state.activeReviewTab = tabName;
+      ['grid', 'coverage', 'alerts'].forEach(t => {
+        const view = document.getElementById(`view-ui1-${t}`) || document.getElementById(`view-ui2-${t}`) || document.getElementById(`view-ui3-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (view) view.classList.add('hidden');
+        if (btn) {
+          btn.className = "review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-[var(--muted-foreground,#94a3b8)] hover:text-white flex items-center gap-1.5";
+        }
+      });
+
+      if (tabName === 'grid') {
+        document.getElementById('view-ui1-grid').classList.remove('hidden');
+        document.getElementById('tab-btn-grid').className = "review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white flex items-center gap-1.5";
+      } else if (tabName === 'coverage') {
+        document.getElementById('view-ui2-coverage').classList.remove('hidden');
+        document.getElementById('tab-btn-coverage').className = "review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white flex items-center gap-1.5";
+      } else if (tabName === 'alerts') {
+        document.getElementById('view-ui3-alerts').classList.remove('hidden');
+        document.getElementById('tab-btn-alerts').className = "review-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white flex items-center gap-1.5";
+      }
+    }
+
+    function renderPhase3Views() {
+      // 1. Render Malla
+      const gridTbody = document.getElementById('schedule-grid-tbody');
+      gridTbody.innerHTML = state.agents.map(ag => {
+        const getBadge = (s) => {
+          if (s.includes("08:00")) return `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">08-16:30</span>`;
+          if (s.includes("12:00")) return `<span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono text-[10px]">12-20:30</span>`;
+          if (s.includes("09:00")) return `<span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-[10px]">09-13:00</span>`;
+          return `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-500 font-mono text-[10px]">Libre</span>`;
+        };
+
+        return `
+          <tr class="hover:bg-slate-800/40">
+            <td class="p-3 font-semibold text-[var(--foreground,#f8fafc)]">${ag.name}</td>
+            <td class="p-3 text-[var(--muted-foreground,#94a3b8)]"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[11px]">${ag.skill}</span></td>
+            <td class="p-3 text-center text-slate-400 font-mono">${ag.type}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[0])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[1])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[2])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[3])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[4])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[5])}</td>
+            <td class="p-3 text-center">${getBadge(ag.shifts[6])}</td>
+            <td class="p-3 text-right font-mono font-bold text-indigo-400">${ag.hours}h</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 2. Render Matriz Cobertura
+      const covCards = document.getElementById('coverage-cards-container');
+      covCards.innerHTML = state.intervals.map(inv => {
+        let border = "border-emerald-500/30 bg-emerald-950/10";
+        let text = "text-emerald-400";
+        let label = "Óptimo (0)";
+
+        if (inv.diff < 0) {
+          border = "border-rose-500/40 bg-rose-950/20";
+          text = "text-rose-400";
+          label = `Déficit (${inv.diff})`;
+        } else if (inv.diff > 0) {
+          border = "border-amber-500/30 bg-amber-950/10";
+          text = "text-amber-400";
+          label = `Superávit (+${inv.diff})`;
+        }
+
+        return `
+          <div class="p-3.5 rounded-xl border ${border}">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-bold text-[var(--foreground,#f8fafc)] font-mono">${inv.time}</span>
+              <span class="text-[10px] font-bold ${text}">${label}</span>
+            </div>
+            <div class="flex justify-between items-end text-xs font-mono mt-2">
+              <span class="text-slate-400">Req: <strong class="text-white">${inv.req} FTE</strong></span>
+              <span class="text-slate-400">Asig: <strong class="${text}">${inv.assigned} FTE</strong></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Barras comparativas
+      const barsContainer = document.getElementById('coverage-bars-container');
+      barsContainer.innerHTML = state.intervals.map(inv => {
+        const reqPct = (inv.req / 10) * 100;
+        const asigPct = (inv.assigned / 10) * 100;
+        return `
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-300 font-bold">${inv.time}</span>
+              <span class="text-slate-400">Demanda: ${inv.req} FTE | Asignados: ${inv.assigned} FTE</span>
+            </div>
+            <div class="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex">
+              <div class="h-full bg-indigo-500" style="width: ${asigPct}%" title="Capacidad Asignada"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 3. Render Alertas
+      renderAlertsList();
+    }
+
+    function renderAlertsList() {
+      const container = document.getElementById('alerts-list-container');
+      const badge = document.getElementById('alerts-badge-count');
+
+      const unresolved = state.alerts.filter(a => !a.resolved);
+      badge.textContent = unresolved.length;
+      badge.className = unresolved.length > 0 
+        ? "ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30"
+        : "ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+
+      if (unresolved.length === 0) {
+        container.innerHTML = `
+          <div class="p-5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-center">
+            <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center font-bold mb-2">✓</div>
+            <h4 class="text-xs font-bold text-emerald-400">No existen alertas pendientes</h4>
+            <p class="text-xs text-slate-300 mt-1">El plan cumple al 100% las restricciones duras y la cobertura requerida.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = unresolved.map(alt => `
+        <div class="p-4 rounded-xl border border-rose-500/40 bg-rose-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase">${alt.rule}</span>
+              <span class="text-xs font-bold text-[var(--foreground,#f8fafc)]">Alerta Crítica #${alt.id}</span>
+            </div>
+            <p class="text-xs text-slate-300">${alt.description}</p>
+            <p class="text-xs text-indigo-400 font-medium">Sugerencia WFM: ${alt.resolution}</p>
+          </div>
+          <button onclick="resolveAlert(${alt.id})" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 transition">
+            Aplicar Ajuste
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function resolveAlert(id) {
+      const alertItem = state.alerts.find(a => a.id === id);
+      if (alertItem) {
+        alertItem.resolved = true;
+        // Corregir intervalo 12:00 - 13:00
+        const inv = state.intervals.find(i => i.time === "12:00 - 13:00");
+        if (inv) {
+          inv.assigned = 9;
+          inv.diff = 0;
+          inv.status = "optimal";
+        }
+        renderPhase3Views();
+        updatePhase4Readiness();
+      }
+    }
+
+    function resolveAllAlerts() {
+      state.alerts.forEach(a => a.resolved = true);
+      const inv = state.intervals.find(i => i.time === "12:00 - 13:00");
+      if (inv) {
+        inv.assigned = 9;
+        inv.diff = 0;
+        inv.status = "optimal";
+      }
+      renderPhase3Views();
+      updatePhase4Readiness();
+    }
+
+    // FASE 4: CICLO DE VIDA, APROBACIÓN TRANSACCIONAL Y EXPORTACIÓN
+    function updatePhase4Readiness() {
+      const unresolved = state.alerts.filter(a => !a.resolved);
+      const hasBlock = state.isBlockedByV2 || unresolved.length > 0;
+
+      const v2Pill = document.getElementById('v2-status-pill');
+      const decisionBox = document.getElementById('v2-decision-box');
+      const alertCheckItem = document.getElementById('checklist-item-alerts');
+      const alertCheckIcon = document.getElementById('checklist-alert-icon');
+      const alertCheckStatus = document.getElementById('checklist-alert-status');
+
+      if (hasBlock) {
+        v2Pill.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20";
+        v2Pill.textContent = "Bloqueado [E2 Requiere Ajuste]";
+
+        alertCheckIcon.className = "w-5 h-5 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs";
+        alertCheckIcon.textContent = "✕";
+        alertCheckStatus.className = "text-xs text-rose-400 font-mono";
+        alertCheckStatus.textContent = `${unresolved.length} Bloqueante(s)`;
+
+        decisionBox.className = "mt-5 p-4 rounded-xl border border-rose-500/40 bg-rose-950/20";
+        decisionBox.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 font-bold">✕</div>
+            <div>
+              <h4 class="text-sm font-bold text-rose-400">V2 = NO: Bloqueo de Aprobación [E2]</h4>
+              <p class="text-xs text-slate-300 mt-1">Existen alertas o restricciones obligatorias insatisfechas. La aprobación transaccional y la exportación de turnos están protegidas contra errores humanos.</p>
+              <div class="mt-3 flex gap-2">
+                <button onclick="switchReviewTab('alerts'); navigateToPhase(3);" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                  Ir a Resolver en Fase 3 (UI3 Alertas)
+                </button>
+                <button onclick="resolveAllAlerts(); state.isBlockedByV2 = false; updatePhase4Readiness();" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 font-medium transition">
+                  Resolver Ahora y Habilitar
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btn-export-csv').setAttribute('disabled', 'true');
+      } else {
+        v2Pill.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        v2Pill.textContent = "100% Conforme [V2 = SÍ]";
+
+        alertCheckIcon.className = "w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs";
+        alertCheckIcon.textContent = "✓";
+        alertCheckStatus.className = "text-xs text-emerald-400 font-mono";
+        alertCheckStatus.textContent = "0 Pendientes";
+
+        decisionBox.className = "mt-5 p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20";
+        decisionBox.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-emerald-400">V2 = SÍ: Habilitado para Aprobación Transaccional</h4>
+              <p class="text-xs text-slate-300 mt-1">Todas las reglas obligatorias se han satisfecho. Puedes confirmar la transacción para crear la versión formal en PostgreSQL.</p>
+              <div class="mt-3 flex gap-2">
+                <button id="btn-approve-schedule" onclick="approvePlanTransaction()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  Aprobar y Crear Versión Oficial [AP]
+                </button>
+                <button onclick="toggleSimulateBlock()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 font-medium transition">
+                  Simular Bloqueo [E2]
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function toggleSimulateBlock() {
+      state.isBlockedByV2 = !state.isBlockedByV2;
+      updatePhase4Readiness();
+    }
+
+    function approvePlanTransaction() {
+      const now = new Date();
+      const versionId = `PLAN-2026-W44-v1.0`;
+      const hash = "e7b9" + Math.random().toString(36).substring(2, 10) + "d4a";
+
+      state.approvedVersions.unshift({
+        version: versionId,
+        date: now.toLocaleString(),
+        user: "Planificador WFM (Admin)",
+        hash: hash,
+        status: "APPROVED"
+      });
+
+      // Actualizar tabla versiones BD2
+      const tbody = document.getElementById('versions-tbody');
+      tbody.innerHTML = state.approvedVersions.map(v => `
+        <tr class="hover:bg-slate-800/40">
+          <td class="p-2.5 font-bold text-emerald-400">${v.version}</td>
+          <td class="p-2.5 text-slate-300">${v.date}</td>
+          <td class="p-2.5 text-slate-300">${v.user}</td>
+          <td class="p-2.5 text-purple-400">${v.hash}</td>
+          <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Oficial</span></td>
+        </tr>
+      `).join('');
+
+      // Habilitar exportación CSV
+      document.getElementById('export-seal').innerHTML = `<strong class="text-emerald-400 font-bold">${versionId} (${hash.substring(0,8)})</strong>`;
+      document.getElementById('btn-export-csv').removeAttribute('disabled');
+
+      alert(`✅ Aprobación Transaccional Exitosa!\n\nSe ha persistido la versión ${versionId} en PostgreSQL con hash criptográfico ${hash}. La exportación CSV ha sido desbloqueada.`);
+    }
+
+    function downloadApprovedCSV() {
+      const csvHeader = "agente_id,nombre_agente,skill,dia_semana,horario_inicio,horario_fin,duracion_horas\n";
+      const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+      
+      let rows = [];
+      state.agents.forEach(ag => {
+        ag.shifts.forEach((s, idx) => {
+          if (s !== "Libre") {
+            const parts = s.split(" - ");
+            rows.push(`${ag.id},"${ag.name}","${ag.skill}",${days[idx]},${parts[0]},${parts[1]},8`);
+          }
+        });
+      });
+
+      const fullCsv = csvHeader + rows.join("\n");
+      const blob = new Blob([fullCsv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `wfm_turnos_aprobados_semana44.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function toggleDiagramDrawer() {
+      const drawer = document.getElementById('diagram-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // Inicialización al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+      // Por defecto iniciamos con el archivo listo para que el usuario pueda probar o simular errores
+      loadSampleValidCSV();
+      renderPhase3Views();
+      updatePhase4Readiness();
+    });
+  </script>
+</body>
+</html>

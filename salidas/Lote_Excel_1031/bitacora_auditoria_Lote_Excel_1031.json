@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": "2026-10-30T21:17:25.950965",
+    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "lote_id": "Lote_Excel_1031",
+    "accion": "INICIO_LOTE",
+    "detalles": "Iniciando análisis para carpeta Drive 'matriz_documentos_lote_03.csv' (ID: drv_folder_007)"
+  },
+  {
+    "timestamp": "2026-10-30T21:17:25.953257",
+    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "lote_id": "Lote_Excel_1031",
+    "accion": "LECTURA_RADICADO",
+    "detalles": "62 solicitudes leídas exitosamente."
+  },
+  {
+    "timestamp": "2026-10-30T21:17:25.954316",
+    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "lote_id": "Lote_Excel_1031",
+    "accion": "COMPROBACION_LINKS",
+    "detalles": "186 enlaces de Drive evaluados."
+  },
+  {
+    "timestamp": "2026-10-30T21:17:25.954316",
+    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "lote_id": "Lote_Excel_1031",
+    "accion": "NORMALIZACION",
+    "detalles": "Normalización completada preservando originales."
+  },
+  {
+    "timestamp": "2026-10-30T21:17:25.955326",
+    "actor": "carolina.mendoza@fondodeempleados.org.co",
+    "lote_id": "Lote_Excel_1031",
+    "accion": "REGLAS_EVALUADAS",
+    "detalles": "Evaluadas reglas POL-2026.1. 186 incidencias generadas."
+  }
+]

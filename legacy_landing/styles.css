@@ -1,0 +1,108 @@
+/* Custom Styles for NovaFlow Landing Page */
+
+/* Background Grid Pattern */
+.bg-grid-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-grid-canvas {
+  background-color: #080a0f;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27344d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff4d4d;
+}
+
+/* SVG Connection Wires */
+.wire-base {
+  fill: none;
+  stroke: #222b3d;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke 0.3s ease;
+}
+
+.wire-active {
+  stroke: #ff4d4d !important;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 77, 0.6));
+}
+
+.wire-pulse {
+  fill: none;
+  stroke: url(#flow-grad);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 12 12;
+  animation: flowWire 1.2s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 77, 0.8));
+}
+
+@keyframes flowWire {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Node Glow and States */
+.flow-node {
+  backdrop-filter: blur(8px);
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, border-color 0.2s;
+}
+
+.flow-node.executing {
+  border-color: #ff4d4d !important;
+  box-shadow: 0 0 25px rgba(255, 77, 77, 0.4), inset 0 0 15px rgba(255, 77, 77, 0.1) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.flow-node.executed-success {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Category Pills in Integrations */
+.cat-pill.active {
+  background-color: #ff4d4d !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(255, 77, 77, 0.3);
+}
+
+/* Modal Visibility Utility */
+.modal-open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.modal-open #modal-box {
+  transform: scale(1) !important;
+}
+
+/* Selection highlight */
+::selection {
+  background: #ff4d4d;
+  color: #ffffff;
+}

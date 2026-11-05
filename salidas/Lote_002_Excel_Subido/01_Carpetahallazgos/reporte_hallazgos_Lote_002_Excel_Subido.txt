@@ -1,0 +1,23 @@
+=== INFORME INDEPENDIENTE DE HALLAZGOS Y CALIDAD - Lote_002_Excel_Subido ===
+Fecha: 2026-10-30 21:08:31
+Política aplicada: POL-2026.1
+Total incidencias detectadas: 3
+
+[ALTA] Solicitud: SOL-1001 | Tipo: FIRMA_NO_VISIBLE
+  Detalle: No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.
+  Evidencia: Página 1 de SOL-1001_Formulario.pdf
+  Acción sugerida: Revisar manualmente el documento para verificar existencia de firma.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-1002 | Tipo: FIRMA_NO_VISIBLE
+  Detalle: No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.
+  Evidencia: Página 1 de SOL-1002_Formulario.pdf
+  Acción sugerida: Revisar manualmente el documento para verificar existencia de firma.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-1003 | Tipo: FIRMA_NO_VISIBLE
+  Detalle: No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.
+  Evidencia: Página 1 de SOL-1003_Formulario.pdf
+  Acción sugerida: Revisar manualmente el documento para verificar existencia de firma.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------

@@ -1,0 +1,41 @@
+=== INFORME INDEPENDIENTE DE HALLAZGOS Y CALIDAD - Lote_001 ===
+Fecha: 2026-10-30 21:08:44
+Política aplicada: POL-2026.1
+Total incidencias detectadas: 6
+
+[MEDIA] Solicitud: SOL-0001 | Tipo: REVISION_FIRMA_REQUERIDA
+  Detalle: Rúbrica visible detectada. Corresponde al analista validar concordancia con cédula y vigencia de poderes.
+  Evidencia: Firma en SOL-0001_Formulario_Solicitud_Firmado.pdf
+  Acción sugerida: Analista debe contrastar firma con cédula y marcar 'Confirmado' con su usuario auditado.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0002 | Tipo: CONTEO_SOPORTES_DISCREPANTE
+  Detalle: Radicado reporta 3 soportes pero en matriz figuran 0.
+  Evidencia: Radicado: 3 vs Matriz: 0
+  Acción sugerida: Confirmar con el canal si faltó anexar algún archivo a la carpeta Drive.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0002 | Tipo: FALTANTE_DOCUMENTAL
+  Detalle: Falta requisito obligatorio general: FORMULARIO_SOLICITUD.
+  Evidencia: Matriz de documentos del lote
+  Acción sugerida: Solicitar al asociado o canal el documento FORMULARIO_SOLICITUD.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0002 | Tipo: FALTANTE_DOCUMENTAL
+  Detalle: Falta requisito obligatorio general: CEDULA.
+  Evidencia: Matriz de documentos del lote
+  Acción sugerida: Solicitar al asociado o canal el documento CEDULA.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0002 | Tipo: FALTANTE_DOCUMENTAL
+  Detalle: Falta requisito obligatorio general: DESPRENDIBLE_PAGO.
+  Evidencia: Matriz de documentos del lote
+  Acción sugerida: Solicitar al asociado o canal el documento DESPRENDIBLE_PAGO.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0002 | Tipo: FALTANTE_CONDICIONAL
+  Detalle: Falta soporte requerido: CODEUDOR_SOPORTE (Monto > $20.000.000 COP).
+  Evidencia: Regla POL-2026.1 para producto LIBRE_INVERSION
+  Acción sugerida: Solicitar CODEUDOR_SOPORTE correspondiente a la política de LIBRE_INVERSION.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------

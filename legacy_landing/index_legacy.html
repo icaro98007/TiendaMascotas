@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaFlow — Automatización de Flujos de Trabajo & Agentes de IA</title>
+  <meta name="description" content="Plataforma de automatización de código abierto basada en nodos. Conecta APIs, ejecuta código Python/JavaScript y orquesta agentes de IA autónomos en tu propia infraestructura o en la nube.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              400: '#fb7185',
+              500: '#ff4d4d',
+              600: '#ea3838',
+              700: '#c52222',
+            },
+            accent: {
+              cyan: '#06b6d4',
+              purple: '#8b5cf6',
+              amber: '#f59e0b',
+              emerald: '#10b981'
+            },
+            dark: {
+              950: '#07090e',
+              900: '#0d1117',
+              850: '#131822',
+              800: '#1a2233',
+              700: '#27344d',
+              600: '#3a4b6b'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'shimmer': 'shimmer 2.5s infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            shimmer: {
+              '100%': { transform: 'translateX(100%)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dark-950 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Background Gradients & Grid -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 bg-grid-pattern opacity-25"></div>
+    <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-brand-600/20 via-accent-purple/10 to-transparent blur-[120px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-[40%] right-[-10%] w-[500px] h-[500px] bg-accent-cyan/10 blur-[140px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-[75%] left-[-10%] w-[500px] h-[500px] bg-brand-500/10 blur-[140px] rounded-full pointer-events-none"></div>
+  </div>
+
+  <!-- Announcement Bar -->
+  <div class="relative z-50 bg-gradient-to-r from-dark-900 via-dark-850 to-dark-900 border-b border-dark-800 text-xs py-2 px-4 text-center flex items-center justify-center gap-2">
+    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/20 text-brand-400 border border-brand-500/30">
+      NOVEDAD
+    </span>
+    <span class="text-slate-300">NovaFlow 2.5 ya está disponible: Multi-agentes autónomos, depuración paso a paso y RAG nativo.</span>
+    <a href="#features" class="font-medium text-brand-400 hover:text-brand-300 underline underline-offset-2 ml-1 inline-flex items-center gap-1">
+      Conocer más
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <!-- Main Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-dark-950/80 border-b border-dark-800/80 transition-all duration-300" id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 via-brand-600 to-accent-purple flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:shadow-brand-500/40 transition-all duration-300">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6" r="3"/>
+            <circle cx="18" cy="18" r="3"/>
+            <path d="M6 9v3a3 3 0 0 0 3 3h6"/>
+            <path d="M18 9a3 3 0 0 0-3-3H9"/>
+            <circle cx="18" cy="6" r="3"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-xl tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300">NovaFlow</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-dark-800 border border-dark-700 text-slate-400">Open-Source</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-medium">Visual Workflow & AI Engine</span>
+        </div>
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#features" class="hover:text-white transition-colors">Características</a>
+        <a href="#workflow-demo" class="hover:text-white transition-colors flex items-center gap-1.5">
+          <span>Simulador</span>
+          <span class="w-2 h-2 rounded-full bg-accent-emerald animate-ping"></span>
+        </a>
+        <a href="#ai-agents" class="hover:text-white transition-colors">Agentes IA</a>
+        <a href="#integrations" class="hover:text-white transition-colors">Integraciones (500+)</a>
+        <a href="#comparativa" class="hover:text-white transition-colors">Comparativa</a>
+        <a href="#pricing" class="hover:text-white transition-colors">Precios</a>
+        <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+      </nav>
+
+      <!-- Right Actions -->
+      <div class="hidden lg:flex items-center gap-4">
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-900 border border-dark-700 hover:border-dark-600 text-xs font-semibold text-slate-300 hover:text-white transition-all">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>Star en GitHub</span>
+          <span class="px-1.5 py-0.5 rounded bg-dark-800 text-[11px] text-brand-400 font-mono">24.9k</span>
+        </a>
+
+        <a href="#pricing" class="relative group inline-flex items-center justify-center p-0.5 overflow-hidden rounded-xl font-medium transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-brand-600/20">
+          <span class="w-full h-full bg-gradient-to-br from-brand-500 via-brand-600 to-accent-purple absolute"></span>
+          <span class="relative px-5 py-2 transition-all ease-out bg-dark-950 rounded-[10px] group-hover:bg-opacity-0 text-white text-sm font-semibold flex items-center gap-2">
+            <span>Empezar Gratis</span>
+            <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </span>
+        </a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg bg-dark-900 border border-dark-800 text-slate-300 hover:text-white" aria-label="Abrir menú">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path id="menu-icon-bars" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+          <path id="menu-icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden bg-dark-950 border-b border-dark-800 px-4 pt-3 pb-6 space-y-3">
+      <a href="#features" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Características</a>
+      <a href="#workflow-demo" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Simulador Interactivo</a>
+      <a href="#ai-agents" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Agentes de IA</a>
+      <a href="#integrations" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Integraciones (500+)</a>
+      <a href="#comparativa" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Comparativa vs Zapier/Make</a>
+      <a href="#pricing" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Precios</a>
+      <a href="#faq" class="block py-2 text-slate-300 hover:text-brand-400 font-medium">Preguntas Frecuentes</a>
+      <div class="pt-3 flex flex-col gap-2">
+        <a href="#pricing" class="w-full text-center py-2.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm">
+          Comenzar Gratis
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      
+      <!-- Pill badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-dark-900/90 border border-dark-700/80 shadow-inner mb-8 backdrop-blur-md">
+        <span class="flex h-2 w-2 rounded-full bg-brand-500"></span>
+        <span class="text-xs font-medium text-slate-300">Alternativa Fair-Code y Open-Source a n8n & Zapier</span>
+        <span class="text-slate-600">|</span>
+        <span class="text-xs font-semibold text-brand-400 flex items-center gap-1 hover:underline cursor-pointer" onclick="scrollToSim()">
+          Probar simulador en vivo &rarr;
+        </span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-[1.12]">
+        Automatiza sin límites.<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-rose-300 to-accent-purple">
+          Visual, con código y potenciado por IA.
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto font-normal leading-relaxed">
+        Construye flujos de trabajo multi-paso complejos, conecta más de 500 servicios, ejecuta código <span class="text-slate-200 font-mono text-base">JavaScript & Python</span> arbitrario y orquesta agentes LLM. Despliega en tu propia nube o servidor con Docker en 60 segundos.
+      </p>
+
+      <!-- CTA Buttons & Docker copy -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
+        <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-rose-500 text-white font-bold text-base shadow-xl shadow-brand-600/30 hover:shadow-brand-500/50 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Empezar Gratis en la Nube</span>
+        </a>
+
+        <!-- Docker Run Quick Copy -->
+        <div class="w-full sm:w-auto relative group">
+          <button id="copy-docker-btn" class="w-full sm:w-auto px-5 py-4 rounded-xl bg-dark-900 border border-dark-700 hover:border-dark-600 text-slate-300 hover:text-white font-mono text-xs flex items-center justify-between gap-3 transition-all duration-200 shadow-md">
+            <div class="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+              <span class="text-brand-400 select-none">$</span>
+              <span class="text-slate-300 truncate">docker run -p 5678:5678 novaflow/app</span>
+            </div>
+            <div class="flex items-center gap-1.5 pl-2 border-l border-dark-700 text-slate-400 group-hover:text-white">
+              <svg id="copy-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <svg id="check-icon" class="w-4 h-4 text-emerald-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span id="copy-text" class="text-[11px] font-sans font-semibold">Copiar</span>
+            </div>
+          </button>
+          <div id="copy-tooltip" class="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-dark-800 border border-dark-600 rounded text-[11px] font-sans text-emerald-400 opacity-0 pointer-events-none transition-opacity duration-200">
+            ¡Comando copiado!
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-400 font-medium">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>100% Auto-hospedable (Self-Hosted)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Sin cobro por ejecuciones en tu servidor</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Cumplimiento estricto GDPR & SOC2 Type II</span>
+        </div>
+      </div>
+
+      <!-- Social Proof Logos -->
+      <div class="mt-16 pt-10 border-t border-dark-800/80">
+        <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-8">
+          Equipos de ingeniería, IA y operaciones que confían en NovaFlow
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+          <div class="flex items-center gap-2 text-slate-300 font-bold text-lg tracking-wider">
+            <span class="w-6 h-6 rounded bg-indigo-500 flex items-center justify-center text-xs text-white">S</span> STRIPE-WAY
+          </div>
+          <div class="flex items-center gap-2 text-slate-300 font-bold text-lg tracking-wider">
+            <span class="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-xs text-white">▲</span> VERCEL-OPS
+          </div>
+          <div class="flex items-center gap-2 text-slate-300 font-bold text-lg tracking-wider">
+            <span class="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-xs text-white">⚡</span> SUPA-CLOUD
+          </div>
+          <div class="flex items-center gap-2 text-slate-300 font-bold text-lg tracking-wider">
+            <span class="w-6 h-6 rounded bg-violet-600 flex items-center justify-center text-xs text-white">◈</span> LINEAR-LABS
+          </div>
+          <div class="flex items-center gap-2 text-slate-300 font-bold text-lg tracking-wider">
+            <span class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-xs text-white">✦</span> DATADOG-OPS
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTERACTIVE WORKFLOW CANVAS & LIVE SIMULATOR -->
+  <section id="workflow-demo" class="py-16 bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950 relative border-y border-dark-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-brand-500/10 text-brand-400 text-xs font-mono font-medium mb-3 border border-brand-500/20">
+            <span>&lt;LIVE_INTERACTIVE_CANVAS /&gt;</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Experimenta el Editor de Nodos en Vivo
+          </h2>
+          <p class="mt-2 text-slate-400 text-sm sm:text-base max-w-xl">
+            Haz clic en <strong class="text-slate-200">"Ejecutar Simulación"</strong> para ver el flujo de datos en tiempo real a través de los nodos o toca cualquier nodo para inspeccionar sus datos.
+          </p>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="mt-6 md:mt-0 flex flex-wrap items-center gap-3">
+          <button id="run-sim-btn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all transform active:scale-95">
+            <svg id="sim-play-icon" class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6V4z"/></svg>
+            <span id="sim-btn-text">Ejecutar Simulación</span>
+          </button>
+          
+          <button id="reset-sim-btn" class="px-3 py-2.5 rounded-xl bg-dark-800 border border-dark-700 hover:bg-dark-700 text-slate-300 text-sm font-medium transition-all" title="Reiniciar lienzo">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </button>
+
+          <span class="h-6 w-[1px] bg-dark-700 hidden sm:block"></span>
+
+          <div class="flex items-center gap-2 text-xs font-mono px-3 py-2 rounded-lg bg-dark-950 border border-dark-800 text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="canvas-status">Estado: Listo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Window Shell -->
+      <div class="rounded-2xl border border-dark-700/80 bg-dark-950/90 shadow-2xl shadow-black/80 overflow-hidden backdrop-blur-xl relative">
+        
+        <!-- Window Top Bar (Mac style) -->
+        <div class="h-11 bg-dark-900 border-b border-dark-800 px-4 flex items-center justify-between text-xs text-slate-400 select-none">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+            <span class="ml-3 font-mono text-[11px] text-slate-400 flex items-center gap-1.5">
+              <span class="text-brand-400">⚡</span> lead-enrichment-and-crm-sync.flow
+            </span>
+          </div>
+          
+          <div class="hidden sm:flex items-center gap-4 text-[11px]">
+            <span class="px-2 py-0.5 rounded bg-dark-800 border border-dark-700 font-mono text-slate-300">Zoom: 100%</span>
+            <span>4 Nodos Activos</span>
+            <span class="text-brand-400 font-semibold">● Modo Edición</span>
+          </div>
+        </div>
+
+        <!-- Canvas Body with interactive SVG Nodes -->
+        <div class="relative w-full h-[580px] sm:h-[500px] overflow-hidden bg-grid-canvas p-6 flex flex-col justify-between" id="canvas-area">
+          
+          <!-- SVG Connecting Beziers -->
+          <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="flow-connections-svg">
+            <defs>
+              <linearGradient id="flow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff4d4d"/>
+                <stop offset="50%" stop-color="#8b5cf6"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="glow"/>
+                <feMerge>
+                  <feMergeNode in="glow"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- Line 1: Node 1 to Node 2 -->
+            <path id="wire-1" class="wire-base" d="M 230 180 C 290 180, 310 180, 370 180" />
+            <path id="wire-pulse-1" class="wire-pulse hidden" d="M 230 180 C 290 180, 310 180, 370 180" />
+
+            <!-- Line 2: Node 2 to Node 3 (Conditional) -->
+            <path id="wire-2" class="wire-base" d="M 590 180 C 640 180, 650 180, 700 180" />
+            <path id="wire-pulse-2" class="wire-pulse hidden" d="M 590 180 C 640 180, 650 180, 700 180" />
+
+            <!-- Line 3A: Node 3 to Node 4A (HubSpot - True path) -->
+            <path id="wire-3a" class="wire-base" d="M 880 160 C 930 160, 940 100, 990 100" />
+            <path id="wire-pulse-3a" class="wire-pulse hidden" d="M 880 160 C 930 160, 940 100, 990 100" />
+
+            <!-- Line 3B: Node 3 to Node 4B (Slack - Always notify) -->
+            <path id="wire-3b" class="wire-base" d="M 880 200 C 930 200, 940 280, 990 280" />
+            <path id="wire-pulse-3b" class="wire-pulse hidden" d="M 880 200 C 930 200, 940 280, 990 280" />
+          </svg>
+
+          <!-- Interactive HTML Nodes (Positioned on the canvas) -->
+          <div class="relative z-20 w-full h-full min-w-[900px]">
+            
+            <!-- NODE 1: Webhook Trigger -->
+            <div id="node-1" onclick="openNodeInspector(1)" class="flow-node absolute left-4 top-28 w-56 rounded-xl bg-dark-900/95 border-2 border-dark-700 hover:border-brand-500 shadow-xl cursor-pointer transition-all duration-200 hover:-translate-y-1 group">
+              <div class="p-3.5 border-b border-dark-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center text-sm font-bold">
+                    ⚡
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold text-white group-hover:text-brand-400 transition-colors">Webhook Inbound</h3>
+                    <p class="text-[10px] text-slate-400">Trigger HTTP POST</p>
+                  </div>
+                </div>
+                <span id="badge-1" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-dark-700">Listo</span>
+              </div>
+              <div class="p-3 bg-dark-950/60 text-[11px] font-mono text-slate-300 space-y-1">
+                <div class="flex justify-between text-slate-400">
+                  <span>Ruta:</span>
+                  <span class="text-brand-400">/api/v1/lead</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Método:</span>
+                  <span class="text-emerald-400">POST (JSON)</span>
+                </div>
+              </div>
+              <!-- Output Pin -->
+              <div id="pin-1-out" class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-brand-500 border-2 border-dark-950 shadow"></div>
+            </div>
+
+            <!-- NODE 2: AI Agent & LLM -->
+            <div id="node-2" onclick="openNodeInspector(2)" class="flow-node absolute left-96 top-24 w-60 rounded-xl bg-dark-900/95 border-2 border-dark-700 hover:border-accent-purple shadow-xl cursor-pointer transition-all duration-200 hover:-translate-y-1 group">
+              <!-- Input Pin -->
+              <div id="pin-2-in" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-dark-700 border-2 border-dark-950 shadow"></div>
+              
+              <div class="p-3.5 border-b border-dark-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-accent-purple/20 text-accent-purple border border-accent-purple/30 flex items-center justify-center text-sm font-bold">
+                    ✨
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold text-white group-hover:text-accent-purple transition-colors">Agente IA Autónomo</h3>
+                    <p class="text-[10px] text-slate-400">Claude 3.5 & Scoring</p>
+                  </div>
+                </div>
+                <span id="badge-2" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-dark-700">Espera</span>
+              </div>
+              <div class="p-3 bg-dark-950/60 text-[11px] font-mono text-slate-300 space-y-1">
+                <div class="flex justify-between text-slate-400">
+                  <span>Prompt:</span>
+                  <span class="text-slate-300 truncate max-w-[110px]">Score & Categorize</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>RAG Memory:</span>
+                  <span class="text-accent-cyan">VectorDB pgvector</span>
+                </div>
+              </div>
+              <!-- Output Pin -->
+              <div id="pin-2-out" class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-accent-purple border-2 border-dark-950 shadow"></div>
+            </div>
+
+            <!-- NODE 3: Router / Conditional -->
+            <div id="node-3" onclick="openNodeInspector(3)" class="flow-node absolute left-[670px] top-28 w-52 rounded-xl bg-dark-900/95 border-2 border-dark-700 hover:border-accent-amber shadow-xl cursor-pointer transition-all duration-200 hover:-translate-y-1 group">
+              <!-- Input Pin -->
+              <div id="pin-3-in" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-dark-700 border-2 border-dark-950 shadow"></div>
+
+              <div class="p-3.5 border-b border-dark-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-accent-amber/20 text-accent-amber border border-accent-amber/30 flex items-center justify-center text-sm font-bold">
+                    ⑂
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold text-white group-hover:text-accent-amber transition-colors">Router (If / Else)</h3>
+                    <p class="text-[10px] text-slate-400">Condicional de datos</p>
+                  </div>
+                </div>
+                <span id="badge-3" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-dark-700">Espera</span>
+              </div>
+              <div class="p-3 bg-dark-950/60 text-[11px] font-mono text-slate-300">
+                <div class="text-slate-400 text-[10px]">Regla:</div>
+                <div class="text-amber-400 mt-0.5 truncate">$lead.score &gt;= 85</div>
+              </div>
+              <!-- Output Pins (True & False) -->
+              <div id="pin-3-out-a" class="absolute -right-2 top-6 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-950 shadow" title="True"></div>
+              <div id="pin-3-out-b" class="absolute -right-2 bottom-6 w-4 h-4 rounded-full bg-rose-500 border-2 border-dark-950 shadow" title="False"></div>
+            </div>
+
+            <!-- NODE 4A: HubSpot CRM Sync -->
+            <div id="node-4a" onclick="openNodeInspector(4)" class="flow-node absolute left-[960px] top-8 w-56 rounded-xl bg-dark-900/95 border-2 border-dark-700 hover:border-accent-cyan shadow-xl cursor-pointer transition-all duration-200 hover:-translate-y-1 group">
+              <!-- Input Pin -->
+              <div id="pin-4a-in" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-dark-700 border-2 border-dark-950 shadow"></div>
+
+              <div class="p-3.5 border-b border-dark-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 flex items-center justify-center text-sm font-bold">
+                    🟠
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold text-white group-hover:text-accent-cyan transition-colors">HubSpot CRM</h3>
+                    <p class="text-[10px] text-slate-400">Crear Lead Calificado</p>
+                  </div>
+                </div>
+                <span id="badge-4a" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-dark-700">Espera</span>
+              </div>
+              <div class="p-3 bg-dark-950/60 text-[11px] font-mono text-slate-300 space-y-1">
+                <div class="flex justify-between text-slate-400">
+                  <span>Acción:</span>
+                  <span class="text-emerald-400">upsertContact()</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Pipeline:</span>
+                  <span class="text-slate-300">Enterprise High</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- NODE 4B: Slack Alert -->
+            <div id="node-4b" onclick="openNodeInspector(5)" class="flow-node absolute left-[960px] top-56 w-56 rounded-xl bg-dark-900/95 border-2 border-dark-700 hover:border-emerald-500 shadow-xl cursor-pointer transition-all duration-200 hover:-translate-y-1 group">
+              <!-- Input Pin -->
+              <div id="pin-4b-in" class="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-dark-700 border-2 border-dark-950 shadow"></div>
+
+              <div class="p-3.5 border-b border-dark-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-sm font-bold">
+                    💬
+                  </div>
+                  <div>
+                    <h3 class="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors">Slack Notifier</h3>
+                    <p class="text-[10px] text-slate-400">Canal #ventas-leads</p>
+                  </div>
+                </div>
+                <span id="badge-4b" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-dark-800 text-slate-400 border border-dark-700">Espera</span>
+              </div>
+              <div class="p-3 bg-dark-950/60 text-[11px] font-mono text-slate-300 space-y-1">
+                <div class="flex justify-between text-slate-400">
+                  <span>Canal:</span>
+                  <span class="text-accent-cyan">#enterprise-alerts</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Prioridad:</span>
+                  <span class="text-brand-400">ALTA (Instantánea)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Log Console Drawer at Bottom of Canvas -->
+          <div class="relative z-30 mt-auto bg-dark-950/95 border border-dark-800 rounded-xl p-3 backdrop-blur-md">
+            <div class="flex items-center justify-between border-b border-dark-800/80 pb-2 mb-2 text-xs font-mono text-slate-400">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
+                <span class="text-slate-300 font-semibold">Consola de Ejecución en Vivo</span>
+              </div>
+              <span id="exec-timer" class="text-[11px] text-slate-500">Duración: 0.00s</span>
+            </div>
+            <div id="console-logs" class="h-16 overflow-y-auto font-mono text-xs text-slate-400 space-y-1 pr-2">
+              <div class="text-slate-500">[14:10:00] Flujo compilado en memoria. Esperando desencadenador o ejecución manual.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MODAL / DRAWER FOR NODE INSPECTION (JSON & Configuration) -->
+  <div id="node-inspector-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="w-full max-w-xl bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200" id="modal-box">
+      
+      <div class="p-4 bg-dark-850 border-b border-dark-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="modal-icon" class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-base font-bold">
+            ⚡
+          </div>
+          <div>
+            <h3 id="modal-title" class="text-sm font-bold text-white">Configuración del Nodo</h3>
+            <p id="modal-subtitle" class="text-xs text-slate-400">Inspección de Parámetros y Salida JSON</p>
+          </div>
+        </div>
+        <button onclick="closeNodeInspector()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Tabs in modal -->
+        <div class="flex border-b border-dark-800 text-xs font-medium">
+          <button class="pb-2 px-3 border-b-2 border-brand-500 text-brand-400 font-semibold">Payload & Salida</button>
+          <button class="pb-2 px-3 text-slate-400 hover:text-slate-200">Parámetros</button>
+          <button class="pb-2 px-3 text-slate-400 hover:text-slate-200">Código JS / Python</button>
+        </div>
+
+        <div class="relative">
+          <pre id="modal-json" class="p-3.5 rounded-xl bg-dark-950 border border-dark-800 font-mono text-xs text-emerald-400 overflow-x-auto max-h-64 leading-relaxed"></pre>
+        </div>
+      </div>
+
+      <div class="p-4 bg-dark-850 border-t border-dark-700 flex justify-end gap-2">
+        <button onclick="closeNodeInspector()" class="px-4 py-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-200 text-xs font-semibold transition-colors">
+          Cerrar
+        </button>
+        <button onclick="simulateSingleNode()" class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6V4z"/></svg>
+          Probar este paso
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- KEY FEATURES & PILLARS SECTION -->
+  <section id="features" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-brand-400 font-mono font-bold mb-3">ARQUITECTURA DE PRÓXIMA GENERACIÓN</h2>
+        <h3 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          La libertad del código con la velocidad de lo visual
+        </h3>
+        <p class="mt-4 text-slate-400 text-base sm:text-lg">
+          Sin encerrarte en cajas negras. Si una herramienta visual no es suficiente, escribe código. Si necesitas escalar a millones de eventos, despliega en tu clúster.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Feature 1 -->
+        <div class="feature-card p-8 rounded-2xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-800 hover:border-brand-500/50 transition-all duration-300 group hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center text-xl font-bold mb-6 group-hover:scale-110 transition-transform">
+            ⚡
+          </div>
+          <h4 class="text-xl font-bold text-white mb-3">Editor Basado en Nodos</h4>
+          <p class="text-slate-400 text-sm leading-relaxed mb-4">
+            Conecta disparadores, bifurcaciones condicionales, bucles iterativos y funciones de transformación con arrastrar y soltar. Visualiza cada dato transformado en cada nodo con precisión milimétrica.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Depuración paso a paso en vivo
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Inspección de JSON bidireccional
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Control de versiones nativo con Git
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 2: AI First -->
+        <div class="feature-card p-8 rounded-2xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-800 hover:border-accent-purple/50 transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden">
+          <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-accent-purple/20 border border-accent-purple/40 text-[10px] font-mono text-accent-purple uppercase tracking-wider">
+            Revolucionario
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-accent-purple/10 border border-accent-purple/30 text-accent-purple flex items-center justify-center text-xl font-bold mb-6 group-hover:scale-110 transition-transform">
+            🤖
+          </div>
+          <h4 class="text-xl font-bold text-white mb-3">Agentes de IA y RAG Nativos</h4>
+          <p class="text-slate-400 text-sm leading-relaxed mb-4">
+            No necesitas LangChain complejo ni código boilerplate. Agrega nodos de razonamiento con OpenAI, Anthropic Claude, Gemini o modelos locales vía Ollama con soporte directo para bases de datos vectoriales.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="text-accent-purple">✓</span> Memoria conversacional y embeddings
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-accent-purple">✓</span> Llamadas a herramientas (Function Calling)
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-accent-purple">✓</span> Soporte para Ollama, vLLM y modelos privados
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 3: Full Code Flexibility -->
+        <div class="feature-card p-8 rounded-2xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-800 hover:border-accent-cyan/50 transition-all duration-300 group hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan flex items-center justify-center text-xl font-bold mb-6 group-hover:scale-110 transition-transform">
+            &lt;/&gt;
+          </div>
+          <h4 class="text-xl font-bold text-white mb-3">JavaScript & Python Ilimitados</h4>
+          <p class="text-slate-400 text-sm leading-relaxed mb-4">
+            ¿Necesitas una biblioteca npm o manipular dataframes con pandas? Escribe código nativo dentro de cualquier nodo. Importa paquetes externos de forma segura en un entorno aislado.
+          </p>
+          <ul class="text-xs text-slate-400 space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="text-accent-cyan">✓</span> Entorno de ejecución en sandbox seguro
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-accent-cyan">✓</span> Soporte completo para paquetes npm y pip
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-accent-cyan">✓</span> Autocompletado inteligente TypeScript
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Feature Deep-Dive Grid: Self-Hosting & Privacy -->
+      <div class="mt-12 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-dark-900 via-dark-850 to-dark-900 border border-dark-700/80 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/30">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>Privacidad & Soberanía de Datos</span>
+            </div>
+            <h3 class="text-2xl sm:text-4xl font-extrabold text-white">
+              Tus datos y credenciales nunca salen de tu perímetro.
+            </h3>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+              A diferencia de Zapier o Make, NovaFlow puede ejecutarse 100% en tu propia VPC, Kubernetes o servidor físico. No hay límites en la cantidad de ejecuciones, ni cobros sorpresivos por número de pasos en un flujo.
+            </p>
+            <div class="pt-4 flex flex-wrap gap-4 text-xs font-mono text-slate-300">
+              <div class="px-3 py-2 rounded-lg bg-dark-950 border border-dark-800 flex items-center gap-2">
+                <span class="text-brand-400 font-bold">🐳</span> Docker Compose
+              </div>
+              <div class="px-3 py-2 rounded-lg bg-dark-950 border border-dark-800 flex items-center gap-2">
+                <span class="text-accent-cyan font-bold">☸</span> Kubernetes Helm Charts
+              </div>
+              <div class="px-3 py-2 rounded-lg bg-dark-950 border border-dark-800 flex items-center gap-2">
+                <span class="text-accent-purple font-bold">🔒</span> Cifrado AES-256 en reposo
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-dark-950 rounded-xl p-5 border border-dark-800 font-mono text-xs shadow-inner">
+            <div class="flex items-center justify-between pb-3 border-b border-dark-800 text-slate-400 text-[11px]">
+              <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> docker-compose.yml
+              </span>
+              <span class="text-slate-500">YAML</span>
+            </div>
+            <pre class="mt-3 text-slate-300 overflow-x-auto leading-relaxed text-[11px]"><span class="text-accent-purple">version:</span> <span class="text-emerald-400">'3.8'</span>
+<span class="text-accent-purple">services:</span>
+  <span class="text-brand-400">novaflow:</span>
+    <span class="text-accent-cyan">image:</span> novaflow/engine:latest
+    <span class="text-accent-cyan">ports:</span>
+      - <span class="text-emerald-400">"5678:5678"</span>
+    <span class="text-accent-cyan">environment:</span>
+      - <span class="text-slate-400">EXECUTIONS_MODE=queue</span>
+      - <span class="text-slate-400">REDIS_HOST=redis</span>
+      - <span class="text-slate-400">ENCRYPTION_KEY=${SECRET}</span>
+    <span class="text-accent-cyan">restart:</span> always</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTEGRATIONS DIRECTORY SECTION (500+ APIS with Interactive Search) -->
+  <section id="integrations" class="py-24 bg-dark-900/60 border-t border-dark-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-accent-cyan/10 text-accent-cyan text-xs font-mono font-medium mb-3 border border-accent-cyan/20">
+          <span>ECOSISTEMA SIN FRONTERAS</span>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Conéctate a más de 500 aplicaciones y APIs
+        </h2>
+        <p class="mt-4 text-slate-400 text-base">
+          O integra cualquier endpoint REST o GraphQL con nuestro conector genérico HTTP en cuestión de segundos.
+        </p>
+
+        <!-- Search Bar & Filters -->
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-2xl mx-auto">
+          <div class="relative w-full">
+            <svg class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="integration-search" placeholder="Buscar integración (ej: Postgres, Slack, OpenAI, Stripe...)" class="w-full pl-11 pr-4 py-3 rounded-xl bg-dark-950 border border-dark-700 focus:border-brand-500 focus:outline-none text-sm text-slate-200 placeholder-slate-500 shadow-inner">
+          </div>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="mt-5 flex flex-wrap justify-center gap-2 text-xs font-medium" id="category-tabs">
+          <button data-cat="all" class="cat-pill active px-3.5 py-1.5 rounded-lg bg-brand-600 text-white transition-all">Todos (500+)</button>
+          <button data-cat="ai" class="cat-pill px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 transition-all">IA & Modelos</button>
+          <button data-cat="db" class="cat-pill px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 transition-all">Bases de Datos</button>
+          <button data-cat="comms" class="cat-pill px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 transition-all">Comunicación</button>
+          <button data-cat="crm" class="cat-pill px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 transition-all">CRM & Ventas</button>
+          <button data-cat="dev" class="cat-pill px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-slate-300 transition-all">Dev & Cloud</button>
+        </div>
+      </div>
+
+      <!-- Integrations Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="integrations-grid">
+        <!-- Rendered dynamically via JS with fallback cards -->
+      </div>
+
+      <!-- Missing integration callout -->
+      <div class="mt-12 text-center p-6 rounded-2xl bg-dark-950/80 border border-dark-800 max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-left">
+          <h4 class="text-sm font-bold text-white">¿No encuentras tu servicio interno?</h4>
+          <p class="text-xs text-slate-400">Usa el nodo genérico HTTP Request o crea un nodo comunitario en TypeScript.</p>
+        </div>
+        <a href="#faq" class="px-4 py-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-xs font-semibold text-slate-200 whitespace-nowrap transition-colors">
+          Ver Documentación
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE SECTION (NovaFlow vs Zapier vs Make) -->
+  <section id="comparativa" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-brand-400 font-mono font-bold mb-3">COMPARATIVA DIRECTA</h2>
+        <h3 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          ¿Por qué los ingenieros eligen NovaFlow?
+        </h3>
+        <p class="mt-4 text-slate-400 text-base sm:text-lg">
+          Compara las capacidades técnicas y los modelos de costos con las herramientas heredadas.
+        </p>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-dark-700/80 shadow-2xl bg-dark-900/60 backdrop-blur-md">
+        <table class="w-full text-left text-sm text-slate-300 min-w-[700px]">
+          <thead class="text-xs uppercase bg-dark-950/90 text-slate-400 border-b border-dark-700">
+            <tr>
+              <th scope="col" class="py-5 px-6">Característica Clave</th>
+              <th scope="col" class="py-5 px-6 text-brand-400 font-bold text-base bg-brand-500/10 border-x border-brand-500/20">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span> NovaFlow
+                </div>
+              </th>
+              <th scope="col" class="py-5 px-6 font-semibold">Zapier</th>
+              <th scope="col" class="py-5 px-6 font-semibold">Make (Integromat)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-dark-800/80">
+            
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Auto-hospedaje (Self-Hosted en tu servidor)</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400 flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span>Sí, ilimitado (Docker/K8s)</span>
+              </td>
+              <td class="py-4 px-6 text-rose-400">✗ No (Solo SaaS propietario)</td>
+              <td class="py-4 px-6 text-rose-400">✗ No (Solo SaaS propietario)</td>
+            </tr>
+
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Modelo de Costos por Paso / Tarea</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400">
+                <span>Por flujo ejecutado o $0 ilimitado</span>
+              </td>
+              <td class="py-4 px-6 text-slate-400">Cobro por cada paso individual (costoso)</td>
+              <td class="py-4 px-6 text-slate-400">Cobro por cada operación consumida</td>
+            </tr>
+
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Soporte Nativo de JavaScript & Python</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400">
+                <span>✓ Completo con paquetes npm/pip</span>
+              </td>
+              <td class="py-4 px-6 text-slate-400">Muy limitado (Solo JS básico)</td>
+              <td class="py-4 px-6 text-slate-400">Limitado a funciones propietarias</td>
+            </tr>
+
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Agentes de IA Autónomos y RAG</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400">
+                <span>✓ Integrado (Memoria + VectorDB)</span>
+              </td>
+              <td class="py-4 px-6 text-slate-400">Básico (Solo llamadas OpenAI simples)</td>
+              <td class="py-4 px-6 text-slate-400">Básico (Módulos de IA estándar)</td>
+            </tr>
+
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Acceso a Bases de Datos en Red Privada</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400">
+                <span>✓ Acceso directo sin túneles complejos</span>
+              </td>
+              <td class="py-4 px-6 text-rose-400">Requiere exponer BD a Internet</td>
+              <td class="py-4 px-6 text-rose-400">Requiere abrir puertos o VPN costosa</td>
+            </tr>
+
+            <tr class="hover:bg-dark-800/30 transition-colors">
+              <td class="py-4 px-6 font-medium text-white">Código Fuente Abierto (Fair-Code)</td>
+              <td class="py-4 px-6 bg-brand-500/5 border-x border-brand-500/20 font-bold text-emerald-400">
+                <span>✓ Sí, auditable en GitHub</span>
+              </td>
+              <td class="py-4 px-6 text-rose-400">✗ Cerrado</td>
+              <td class="py-4 px-6 text-rose-400">✗ Cerrado</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRICING SECTION -->
+  <section id="pricing" class="py-24 bg-dark-900/40 border-t border-dark-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <h2 class="text-xs uppercase tracking-widest text-brand-400 font-mono font-bold mb-3">PLANES CLAROS Y PREDECIBLES</h2>
+        <h3 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Elige auto-hospedaje o nuestra nube gestionada
+        </h3>
+        <p class="mt-4 text-slate-400 text-base sm:text-lg">
+          Comienza gratis para siempre con Docker en tu infraestructura o ahorra tiempo con NovaFlow Cloud con backups automáticos.
+        </p>
+
+        <!-- Billing Switcher -->
+        <div class="mt-8 inline-flex items-center p-1 rounded-xl bg-dark-950 border border-dark-700">
+          <button id="btn-billing-monthly" class="px-5 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+            Facturación Mensual
+          </button>
+          <button id="btn-billing-annual" class="px-5 py-2 rounded-lg text-xs font-semibold bg-brand-600 text-white shadow-md transition-all flex items-center gap-1.5">
+            <span>Anual</span>
+            <span class="px-1.5 py-0.5 rounded-full bg-emerald-400 text-dark-950 font-bold text-[10px]">-20%</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pricing Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        
+        <!-- Plan 1: Community (Self-Hosted) -->
+        <div class="rounded-3xl bg-dark-950 border border-dark-800 p-8 flex flex-col justify-between hover:border-dark-700 transition-all">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-lg font-bold text-white">Community</h4>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-dark-800 text-slate-300 border border-dark-700">Self-Hosted</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6">Ideal para desarrolladores, homelabs y equipos que gestionan su propia infraestructura.</p>
+            
+            <div class="mb-6 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-white">$0</span>
+              <span class="text-slate-400 text-sm">/ siempre gratis</span>
+            </div>
+
+            <ul class="text-xs text-slate-300 space-y-3 border-t border-dark-800/80 pt-6">
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Ejecuciones ilimitadas en tu hardware
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Más de 500 nodos de integración
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Soporte completo JS & Python
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Despliegue con Docker / Kubernetes
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Soporte de la comunidad en Discord
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-8">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="w-full block text-center py-3 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-white font-semibold text-xs transition-colors">
+              Ver Guía de Instalación Docker
+            </a>
+          </div>
+        </div>
+
+        <!-- Plan 2: Pro Cloud (Most Popular) -->
+        <div class="rounded-3xl bg-gradient-to-b from-dark-900 to-dark-950 border-2 border-brand-500 p-8 flex flex-col justify-between shadow-2xl shadow-brand-500/20 relative transform md:-translate-y-2">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-brand-600 to-rose-500 text-[11px] font-bold text-white tracking-wide uppercase shadow-lg">
+            Más Popular
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4 mt-2">
+              <h4 class="text-lg font-bold text-white">NovaFlow Cloud Pro</h4>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">Totalmente Gestionado</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6">Para startups y empresas que buscan velocidad sin ocuparse del mantenimiento de servidores.</p>
+            
+            <div class="mb-6 flex items-baseline gap-1">
+              <span id="price-pro" class="text-4xl font-extrabold text-white">$24</span>
+              <span class="text-slate-400 text-sm">/ mes</span>
+            </div>
+
+            <ul class="text-xs text-slate-300 space-y-3 border-t border-dark-800/80 pt-6">
+              <li class="flex items-center gap-2.5">
+                <span class="text-brand-400 font-bold">✓</span> <strong>50,000 ejecuciones de flujo</strong> / mes
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-brand-400 font-bold">✓</span> Flujos de trabajo concurrentes ilimitados
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-brand-400 font-bold">✓</span> Nodos de Agentes IA de alta velocidad
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-brand-400 font-bold">✓</span> Backups automáticos diarios y retención
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-brand-400 font-bold">✓</span> Soporte prioritario por email y chat
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-8">
+            <a href="#" class="w-full block text-center py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-rose-500 text-white font-bold text-xs shadow-lg shadow-brand-500/30 transition-all">
+              Probar 14 Días Gratis
+            </a>
+          </div>
+        </div>
+
+        <!-- Plan 3: Enterprise Dedicated -->
+        <div class="rounded-3xl bg-dark-950 border border-dark-800 p-8 flex flex-col justify-between hover:border-dark-700 transition-all">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-lg font-bold text-white">Enterprise</h4>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-dark-800 text-slate-300 border border-dark-700">Custom VPC</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-6">Para organizaciones con requisitos rigurosos de cumplimiento, SLA y seguridad personalizada.</p>
+            
+            <div class="mb-6 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-white">A Medida</span>
+            </div>
+
+            <ul class="text-xs text-slate-300 space-y-3 border-t border-dark-800/80 pt-6">
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Instancia dedicada o VPC Peering
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Single Sign-On (SAML / Okta / Azure AD)
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Auditoría completa de logs y registros
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> SLA de disponibilidad del 99.99%
+              </li>
+              <li class="flex items-center gap-2.5">
+                <span class="text-emerald-400 font-bold">✓</span> Ingeniero de soluciones dedicado
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-8">
+            <a href="#" class="w-full block text-center py-3 rounded-xl bg-dark-850 hover:bg-dark-800 border border-dark-700 text-white font-semibold text-xs transition-colors">
+              Contactar a Ventas
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS SECTION -->
+  <section class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-brand-400 font-mono font-bold mb-3">TESTIMONIOS DE DESARROLLADORES</h2>
+        <h3 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Respaldado por la comunidad de automatización
+        </h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Review 1 -->
+        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 flex flex-col justify-between">
+          <p class="text-sm text-slate-300 leading-relaxed mb-6">
+            "Migramos más de 120 Zaps a NovaFlow auto-hospedado en nuestro clúster de AWS. Pasamos de gastar $2,200/mes a prácticamente cero, con una latencia de ejecución 5 veces menor."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-500 to-accent-purple flex items-center justify-center font-bold text-white text-sm">
+              AR
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white">Alejandro Ruiz</h5>
+              <p class="text-[11px] text-slate-400">Head of Engineering @ FinTech Scaleup</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 flex flex-col justify-between">
+          <p class="text-sm text-slate-300 leading-relaxed mb-6">
+            "La capacidad de combinar nodos visuales con scripts de Python y llamadas a agentes de OpenAI con memoria pgvector cambió totalmente nuestra velocidad de entrega en el equipo de IA."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-accent-cyan to-brand-500 flex items-center justify-center font-bold text-white text-sm">
+              MC
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white">Mariana Castro</h5>
+              <p class="text-[11px] text-slate-400">AI Automation Architect</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="p-6 rounded-2xl bg-dark-900 border border-dark-800 flex flex-col justify-between">
+          <p class="text-sm text-slate-300 leading-relaxed mb-6">
+            "Para un equipo que maneja datos médicos sensibles (HIPAA), las herramientas tradicionales en la nube eran un no rotundo. Con NovaFlow mantuvimos todo en nuestra red local sin perder velocidad."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-white text-sm">
+              DL
+            </div>
+            <div>
+              <h5 class="text-xs font-bold text-white">David Larsson</h5>
+              <p class="text-[11px] text-slate-400">CTO @ MedHealth Solutions</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ACCORDION FAQ SECTION -->
+  <section id="faq" class="py-24 bg-dark-900/50 border-t border-dark-800 relative">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-brand-400 font-mono font-bold mb-3">RESOLVIENDO DUDAS</h2>
+        <h3 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Preguntas Frecuentes
+        </h3>
+      </div>
+
+      <div class="space-y-4" id="faq-accordion">
+        
+        <!-- FAQ Item 1 -->
+        <div class="faq-item rounded-2xl bg-dark-950 border border-dark-800 overflow-hidden transition-all">
+          <button class="faq-btn w-full p-5 text-left flex items-center justify-between text-sm font-bold text-white hover:text-brand-400 transition-colors">
+            <span>¿Puedo auto-hospedar NovaFlow en mi propio servidor de forma 100% gratuita?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-dark-850 pt-3">
+            Sí. Nuestra edición Community bajo licencia fair-code es totalmente gratuita. Puedes desplegarla mediante Docker o Docker Compose en cualquier VPS (Hetzner, DigitalOcean, AWS, GCP) o servidor dedicado sin límite de ejecuciones ni cobros por paso.
+          </div>
+        </div>
+
+        <!-- FAQ Item 2 -->
+        <div class="faq-item rounded-2xl bg-dark-950 border border-dark-800 overflow-hidden transition-all">
+          <button class="faq-btn w-full p-5 text-left flex items-center justify-between text-sm font-bold text-white hover:text-brand-400 transition-colors">
+            <span>¿En qué se diferencia de herramientas como Zapier o Make?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-dark-850 pt-3">
+            Zapier y Make son soluciones SaaS propietarias donde pagas por cada tarea individual, lo que hace que flujos con miles de iteraciones sean prohibitivamente caros. NovaFlow te da control del código fuente, soporte completo de JS/Python sin restricciones, agentes de IA autónomos y la opción de mantener todos los datos en tu infraestructura.
+          </div>
+        </div>
+
+        <!-- FAQ Item 3 -->
+        <div class="faq-item rounded-2xl bg-dark-950 border border-dark-800 overflow-hidden transition-all">
+          <button class="faq-btn w-full p-5 text-left flex items-center justify-between text-sm font-bold text-white hover:text-brand-400 transition-colors">
+            <span>¿Cómo funcionan los nodos de Agentes de IA y LLMs?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-dark-850 pt-3">
+            NovaFlow incluye primitivas nativas de orquestación de agentes: nodos de memoria vectorial (Pinecone, Qdrant, Supabase pgvector), modelos de razonamiento (OpenAI GPT-4o, Anthropic Claude 3.5, Google Gemini y Ollama local) y capacidad de enlazar herramientas (Tools) para que el agente ejecute llamadas API según su razonamiento.
+          </div>
+        </div>
+
+        <!-- FAQ Item 4 -->
+        <div class="faq-item rounded-2xl bg-dark-950 border border-dark-800 overflow-hidden transition-all">
+          <button class="faq-btn w-full p-5 text-left flex items-center justify-between text-sm font-bold text-white hover:text-brand-400 transition-colors">
+            <span>¿Es fácil migrar mis flujos existentes desde n8n?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-dark-850 pt-3">
+            Sí. Disponemos de un importador nativo de flujos JSON compatible con el esquema de nodos de n8n, lo que permite transferir la mayoría de tus pipelines de datos en pocos minutos.
+          </div>
+        </div>
+
+        <!-- FAQ Item 5 -->
+        <div class="faq-item rounded-2xl bg-dark-950 border border-dark-800 overflow-hidden transition-all">
+          <button class="faq-btn w-full p-5 text-left flex items-center justify-between text-sm font-bold text-white hover:text-brand-400 transition-colors">
+            <span>¿Cómo se manejan la seguridad y el almacenamiento de credenciales?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-dark-850 pt-3">
+            Todas las claves de API, tokens OAuth y credenciales de base de datos se almacenan cifradas en reposo con algoritmos AES-256 utilizando tu propia clave maestra secreta (`ENCRYPTION_KEY`). Además, los nodos de código se ejecutan en sandboxes aislados sin acceso no autorizado al sistema operativo anfitrión.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FINAL CALL TO ACTION (CTA) -->
+  <section class="py-24 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="rounded-3xl p-8 sm:p-14 bg-gradient-to-r from-brand-700 via-brand-600 to-accent-purple text-center relative overflow-hidden shadow-2xl shadow-brand-600/30">
+        <!-- Background light rays -->
+        <div class="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-3xl mx-auto">
+          Comienza a automatizar tus flujos de trabajo hoy mismo.
+        </h2>
+        <p class="mt-4 text-brand-100 text-base sm:text-lg max-w-2xl mx-auto font-normal">
+          Únete a miles de ingenieros que ya han creado más de 2 millones de automatizaciones con NovaFlow.
+        </p>
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-dark-950 hover:bg-slate-100 font-extrabold text-sm shadow-xl transition-all duration-200 transform hover:scale-105">
+            Crear Cuenta Gratuita
+          </a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-dark-950/60 hover:bg-dark-950 text-white font-semibold text-sm border border-white/20 transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>Ver Repositorio en GitHub</span>
+          </a>
+        </div>
+
+        <p class="mt-6 text-xs text-brand-200">
+          Sin tarjeta de crédito requerida • Licencia Fair-Code • Instalación en 1 minuto
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-dark-950 border-t border-dark-800 text-slate-400 text-xs py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+        
+        <!-- Brand column -->
+        <div class="col-span-2">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
+              ⚡
+            </div>
+            <span class="font-bold text-white text-base">NovaFlow</span>
+          </div>
+          <p class="text-slate-400 max-w-sm mb-4 leading-relaxed">
+            Plataforma de automatización de flujos de trabajo basada en nodos y agentes de inteligencia artificial para ingenieros de software y equipos modernos.
+          </p>
+          <div class="flex items-center gap-2 text-[11px] text-emerald-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Todos los sistemas operativos (99.99% uptime)</span>
+          </div>
+        </div>
+
+        <!-- Col 1: Producto -->
+        <div>
+          <h5 class="font-semibold text-white mb-3">Producto</h5>
+          <ul class="space-y-2">
+            <li><a href="#features" class="hover:text-white transition-colors">Editor de Nodos</a></li>
+            <li><a href="#ai-agents" class="hover:text-white transition-colors">Agentes de IA</a></li>
+            <li><a href="#integrations" class="hover:text-white transition-colors">Directorio de Nodos</a></li>
+            <li><a href="#pricing" class="hover:text-white transition-colors">Precios Cloud</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Changelog</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 2: Desarrolladores -->
+        <div>
+          <h5 class="font-semibold text-white mb-3">Desarrolladores</h5>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">Documentación</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Guía de Docker</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Crear Nodos Custom</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">REST API Reference</a></li>
+            <li><a href="https://github.com" class="hover:text-white transition-colors">GitHub Repository</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Legal & Comunidad -->
+        <div>
+          <h5 class="font-semibold text-white mb-3">Comunidad & Legal</h5>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">Discord Oficial</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Foro de la Comunidad</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Política de Privacidad</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Términos de Servicio</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Seguridad & SOC2</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-8 border-t border-dark-800/80 flex flex-col sm:flex-row items-center justify-between text-slate-500 gap-4">
+        <p>&copy; 2026 NovaFlow Engine Inc. Todos los derechos reservados. Diseñado para automatizadores libres.</p>
+        <div class="flex items-center gap-4 text-slate-400">
+          <span>Licencia Fair-Code</span>
+          <span>•</span>
+          <span>Hecho con ❤️ para la comunidad Open-Source</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

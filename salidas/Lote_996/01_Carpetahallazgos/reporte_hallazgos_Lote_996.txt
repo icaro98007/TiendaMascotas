@@ -1,0 +1,101 @@
+=== INFORME INDEPENDIENTE DE HALLAZGOS Y CALIDAD - Lote_996 ===
+Fecha: 2026-10-30 21:08:44
+Política aplicada: POL-2026.1
+Total incidencias detectadas: 16
+
+[MEDIA] Solicitud: SOL-0001 | Tipo: REVISION_FIRMA_REQUERIDA
+  Detalle: Rúbrica visible detectada. Corresponde al analista validar concordancia con cédula y vigencia de poderes.
+  Evidencia: Firma en SOL-0001_Formulario_Solicitud_Firmado.pdf
+  Acción sugerida: Analista debe contrastar firma con cédula y marcar 'Confirmado' con su usuario auditado.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0002 | Tipo: FALTANTE_CONDICIONAL
+  Detalle: Falta soporte requerido: CODEUDOR_SOPORTE (Monto > $20.000.000 COP).
+  Evidencia: Regla POL-2026.1 para producto LIBRE_INVERSION
+  Acción sugerida: Solicitar CODEUDOR_SOPORTE correspondiente a la política de LIBRE_INVERSION.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0002 | Tipo: REVISION_FIRMA_REQUERIDA
+  Detalle: Rúbrica visible detectada. Corresponde al analista validar concordancia con cédula y vigencia de poderes.
+  Evidencia: Firma en SOL-0002_Formulario_Credito.pdf
+  Acción sugerida: Analista debe contrastar firma con cédula y marcar 'Confirmado' con su usuario auditado.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0002 | Tipo: VIGENCIA_EXPIRADA
+  Detalle: DESPRENDIBLE_PAGO emitido el 2026-05-15 excede el límite de 60 días.
+  Evidencia: Fecha expedición extraída: 2026-05-15 vs Radicación: 2026-10-15
+  Acción sugerida: Solicitar soporte con fecha de expedición actualizada.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0003 | Tipo: CONTEO_SOPORTES_DISCREPANTE
+  Detalle: Radicado reporta 5 soportes pero en matriz figuran 4.
+  Evidencia: Radicado: 5 vs Matriz: 4
+  Acción sugerida: Confirmar con el canal si faltó anexar algún archivo a la carpeta Drive.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0003 | Tipo: FALTANTE_CONDICIONAL
+  Detalle: Falta soporte requerido: AVALUO_COMERCIAL (Monto > $50.000.000 COP).
+  Evidencia: Regla POL-2026.1 para producto VIVIENDA
+  Acción sugerida: Solicitar AVALUO_COMERCIAL correspondiente a la política de VIVIENDA.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0003 | Tipo: REVISION_FIRMA_REQUERIDA
+  Detalle: Rúbrica visible detectada. Corresponde al analista validar concordancia con cédula y vigencia de poderes.
+  Evidencia: Firma en SOL-0003_Formulario_Hipotecario.pdf
+  Acción sugerida: Analista debe contrastar firma con cédula y marcar 'Confirmado' con su usuario auditado.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0004 | Tipo: REVISION_FIRMA_REQUERIDA
+  Detalle: Rúbrica visible detectada. Corresponde al analista validar concordancia con cédula y vigencia de poderes.
+  Evidencia: Firma en SOL-0004_Formulario_Credito_Auto.pdf
+  Acción sugerida: Analista debe contrastar firma con cédula y marcar 'Confirmado' con su usuario auditado.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0004 | Tipo: ENLACE_DRIVE_INACCESIBLE
+  Detalle: Archivo 'SOL-0004_Cedula.pdf' con ID 'BROKEN_FILE_ID_404_NOT_FOUND': NO_ACCESIBLE.
+  Evidencia: URL: https://drive.google.com/file/d/BROKEN_FILE_ID_404_NOT_FOUND/view
+  Acción sugerida: Verificar permisos en carpeta origen o corregir ID en matriz.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0004 | Tipo: VIGENCIA_EXPIRADA
+  Detalle: DESPRENDIBLE_PAGO emitido el 2026-07-15 excede el límite de 60 días.
+  Evidencia: Fecha expedición extraída: 2026-07-15 vs Radicación: 2026-10-20
+  Acción sugerida: Solicitar soporte con fecha de expedición actualizada.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0004 | Tipo: VIGENCIA_EXPIRADA
+  Detalle: COTIZACION_VEHICULO emitido el 2026-08-10 excede el límite de 30 días.
+  Evidencia: Fecha expedición extraída: 2026-08-10 vs Radicación: 2026-10-20
+  Acción sugerida: Solicitar soporte con fecha de expedición actualizada.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0005 | Tipo: CONTEO_SOPORTES_DISCREPANTE
+  Detalle: Radicado reporta 2 soportes pero en matriz figuran 3.
+  Evidencia: Radicado: 2 vs Matriz: 3
+  Acción sugerida: Confirmar con el canal si faltó anexar algún archivo a la carpeta Drive.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0005 | Tipo: FIRMA_NO_VISIBLE
+  Detalle: No se visualizó rúbrica ni estampa digital en la sección de firma del formulario.
+  Evidencia: Página 1 de SOL-0005_Formulario_Sin_Firmar.pdf
+  Acción sugerida: Revisar manualmente el documento para verificar existencia de firma.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0005 | Tipo: DISCREPANCIA_VALORES
+  Detalle: Radicado indica $10,000,000 COP pero formulario dice $18,000,000 COP.
+  Evidencia: Formulario SOL-0005_Formulario_Sin_Firmar.pdf vs Radicado origen
+  Acción sugerida: Aclarar con el analista comercial y el asociado la cifra real del préstamo.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[ALTA] Solicitud: SOL-0005 | Tipo: DOCUMENTO_NO_LEGIBLE
+  Detalle: El archivo 'SOL-0005_Cedula_Ilegible.pdf' está borroso, dañado o sin texto legible.
+  Evidencia: Análisis visual / OCR de documento
+  Acción sugerida: Solicitar al solicitante reenvío de copia escaneada legible.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------
+[MEDIA] Solicitud: SOL-0005 | Tipo: DISCREPANCIA_METADATOS
+  Detalle: Nombre matriz: 'SOL-0005_Desprendible_Nomina.pdf' vs Drive: 'archivo_renombrado_arbitrario.pdf'.
+  Evidencia: Drive API Metadata (ID: 5mN3B4V5C6X7Z8A9S0D1F2G3H4J5K6_DISCREPANTE)
+  Acción sugerida: Confirmar si hubo renombrado o sustitución del archivo.
+  Estado: PENDIENTE_HUMANO | Revisor: Pendiente
+----------------------------------------------------------------------

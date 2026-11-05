@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe Ejecutivo Back Office - Lote_003</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #1e293b; background: #f8fafc; line-height: 1.6; }
+  .card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+  .badge-success { background: #dcfce7; color: #166534; }
+  .legal-box { border-left: 4px solid #ef4444; background: #fef2f2; padding: 16px; margin: 20px 0; border-radius: 4px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+  .metric-box { background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: center; }
+  .metric-box h3 { margin: 0; font-size: 28px; color: #0f172a; }
+  .metric-box p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { background: #0f172a; color: white; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>INFORME EJECUTIVO DE CONTROL DOCUMENTAL Y AUDITORÍA</h2>
+  <p><strong>Lote:</strong> Lote_003 | <strong>Fecha:</strong> 2026-10-30 21:08:45 | <strong>Política:</strong> POL-2026.1</p>
+  
+  <div class="legal-box">
+    <strong>DECLARACIÓN NORMATIVA OBLIGATORIA:</strong><br>
+    Este informe contiene exclusivamente el dictamen de completitud, vigencia documental e integridad de enlaces de Drive. 
+    <strong>Bajo ninguna circunstancia aprueba, rechaza, calcula solvencia financiera ni autoriza desembolsos de crédito.</strong>
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric-box">
+      <h3>5</h3>
+      <p>Solicitudes (5 de 5)</p>
+    </div>
+    <div class="metric-box">
+      <h3>18</h3>
+      <p>Documentos Verificados</p>
+    </div>
+    <div class="metric-box">
+      <h3>16</h3>
+      <p>Incidencias Totales</p>
+    </div>
+    <div class="metric-box">
+      <h3 style="color: #b91c1c;">6</h3>
+      <p>Severidad ALTA</p>
+    </div>
+  </div>
+
+  <h3>Resumen de Expedientes Analizados</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Solicitud</th>
+        <th>Tipo Crédito</th>
+        <th>Monto (COP)</th>
+        <th>Estado Documental</th>
+        <th>Revisión Firma</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>SOL-0001</strong></td>
+        <td>LIBRANZA</td>
+        <td>$12,500,000</td>
+        <td><span class="badge badge-warn">CON_OBSERVACIONES</span></td>
+        <td>PENDIENTE_HUMANO</td>
+      </tr>
+      <tr>
+        <td><strong>SOL-0002</strong></td>
+        <td>LIBRE_INVERSION</td>
+        <td>$28,500,000</td>
+        <td><span class="badge badge-danger">REQUIERE_REVISION_HUMANA</span></td>
+        <td>PENDIENTE_HUMANO</td>
+      </tr>
+      <tr>
+        <td><strong>SOL-0003</strong></td>
+        <td>VIVIENDA</td>
+        <td>$75,000,000</td>
+        <td><span class="badge badge-danger">REQUIERE_REVISION_HUMANA</span></td>
+        <td>PENDIENTE_HUMANO</td>
+      </tr>
+      <tr>
+        <td><strong>SOL-0004</strong></td>
+        <td>VEHICULO</td>
+        <td>$35,000,000</td>
+        <td><span class="badge badge-danger">REQUIERE_REVISION_HUMANA</span></td>
+        <td>PENDIENTE_HUMANO</td>
+      </tr>
+      <tr>
+        <td><strong>SOL-0005</strong></td>
+        <td>TIPO_DESCONOCIDO_XYZ</td>
+        <td>$10,000,000</td>
+        <td><span class="badge badge-danger">REQUIERE_REVISION_HUMANA</span></td>
+        <td>PENDIENTE_HUMANO</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 30px;">Acciones Recomendadas para el Equipo Humano</h3>
+  <ol>
+    <li>Validar manualmente en la cola de revisión todas las firmas de los formularios marcados con severidad ALTA/MEDIA.</li>
+    <li>Gestionar con los solicitantes o canales los soportes faltantes identificados en la pestaña 'Inventario_por_solicitud'.</li>
+    <li>Verificar permisos de Google Drive para los enlaces marcados como inaccesibles.</li>
+  </ol>
+</div>
+</body>
+</html>

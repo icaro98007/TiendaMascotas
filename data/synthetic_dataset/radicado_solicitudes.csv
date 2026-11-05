@@ -1,0 +1,6 @@
+﻿id_solicitud_origen,tipo_credito_original,fecha_registro_original,hora_registro_original,monto_solicitado_original,estado_original,canal_original,cantidad_soportes_reportada,observacion_original,prioridad_asignada_por_taller,tiempo_respuesta_objetivo_habiles,fecha_hora_primera_respuesta,resultado_prueba,firma_solicitante_revisada_por_participante,resultado_revision_firma
+SOL-0001,LIBRANZA_DOCENTE,2026-10-15,14:30:00,$ 12.500.000 COP,RADICADO,PORTAL_WEB,4,Asociado solicita crédito libranza con deducción mensual ordinaria.,ALTA,3,2026-10-15T15:10:00,CONFORME,,PENDIENTE_HUMANO
+SOL-0002,CONSUMO_PERSONAL,05/06/2026,09:15 AM,"28,500,000.00",INGRESADO,AGENCIA_CENTRAL,3,Solicitud con fecha ambigua y monto alto para libre inversión.,MEDIA,5,,,,PENDIENTE_HUMANO
+SOL-0003,VIVIENDA_URBANA,2026-10-18,16:45,$75.000.000,EN_TRAMITE,SUCURSAL,5,Crédito hipotecario con soporte faltante de avalúo y discrepancia de conteo.,ALTA,2,2026-10-18T17:00:00,,,PENDIENTE_HUMANO
+SOL-0004,COMPRA_VEHICULO,2026-10-20,11:00,35000000,RECIBIDO,VIRTUAL_PORTAL,4,Caso con enlace Drive inaccesible y documento con vigencia vencida.,MEDIA,5,,,,PENDIENTE_HUMANO
+SOL-0005,TIPO_DESCONOCIDO_XYZ,2026-10-22,18:20,$ 10.000.000 COP,RADICADO,ONLINE,2,"Caso con discrepancia entre monto de formulario y radicado, y cédula borrosa.",BAJA,5,,,,PENDIENTE_HUMANO

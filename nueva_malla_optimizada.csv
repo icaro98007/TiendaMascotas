@@ -1,0 +1,9 @@
+Agente_ID,Nombre_Asesor,Skill_Principal,Turno_Horario,Canal,Dotacion_Requerida,Tipo_Ajuste,Impacto_SLA
+AGT-001,Carlos Mendoza,Consulta General,08:30 - 16:30,Voz,1,Turno Escalonado Pico,Absorbe pico 09:00 (57m/h)
+AGT-002,Valeria Rios,Consulta General,09:00 - 17:00,Voz,1,Dotación Base,Cobertura continua
+AGT-003,Andrés Silva,Consulta General,10:00 - 18:00,Voz,1,Refuerzo Almuerzo,Soporte ventana 12:00-14:00
+AGT-004,Diego Fernández,Asesoría Técnica,08:00 - 16:00,Voz / Remoto,1,Dotación Base,SLA 82% garantizado
+AGT-005,Camila Ortiz,Asesoría Técnica,12:00 - 20:00,Voz / Remoto,1,Refuerzo Tarde Pico,Resuelve pico 17:00 (65m/h)
+AGT-006,Martín Gómez,Asesoría Técnica,14:00 - 22:00,Voz / Remoto,1,Dotación Base Cierre,Cobertura hasta noche
+AGT-007,Laura Paredes,Esp. Comercial,14:00 - 22:00,Chat Omnicanal,1,Especialidad Ventas,Conversion rate 18%
+AGT-008,Javier Torres,Multiskill Noche,22:00 - 06:00,Híbrido (Voz + Chat),1,Consolidación Nocturna,49 min máx (1 Agente transversal)
