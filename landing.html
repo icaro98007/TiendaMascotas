@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Huellitas POS | El Sistema Operativo para Tiendas de Mascotas y Veterinarias</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Huellitas POS es la plataforma móvil de punto de venta, inventario semáforo y gestión de clientes con sincronización en Google Drive para pet shops y veterinarias en Colombia." />
+  <meta name="theme-color" content="#090D16" />
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            dark: {
+              base: '#090D16',
+              surface: '#0F172A',
+              card: '#131D31',
+              border: 'rgba(255, 255, 255, 0.08)',
+            }
+          },
+          animation: {
+            'glow-pulse': 'glow 4s ease-in-out infinite alternate',
+            'float-slow': 'float 6s ease-in-out infinite',
+            'float-delayed': 'float 6s ease-in-out 3s infinite',
+            'pulse-subtle': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            glow: {
+              '0%': { opacity: '0.4', transform: 'scale(0.95)' },
+              '100%': { opacity: '0.8', transform: 'scale(1.05)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #090D16;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glow Meshes */
+    .glow-sphere {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom Glassmorphism */
+    .glass-card {
+      background: rgba(19, 29, 49, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Gradient Text */
+    .gradient-text-emerald {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-text-silver {
+      background: linear-gradient(180deg, #FFFFFF 0%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Subtle Grid Background Pattern */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Custom Slider */
+    input[type=range] {
+      accent-color: #10B981;
+    }
+  </style>
+</head>
+<body class="bg-dark-base relative selection:bg-brand-500 selection:text-white">
+
+  <!-- Glow Background Orbs -->
+  <div class="glow-sphere w-[550px] h-[550px] bg-emerald-500/15 top-[-100px] left-1/2 -translate-x-1/2 animate-glow-pulse"></div>
+  <div class="glow-sphere w-[450px] h-[450px] bg-cyan-500/10 top-[600px] right-[-100px]"></div>
+  <div class="glow-sphere w-[500px] h-[500px] bg-emerald-600/10 top-[1600px] left-[-150px]"></div>
+
+  <!-- STICKY TOP NAVBAR -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-dark-base/80 backdrop-blur-xl border-b border-white/5 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-emerald-500 to-teal-400 p-0.5 flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-dark-base rounded-[14px] flex items-center justify-center text-brand-400">
+            <i data-lucide="paw-print" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-lg font-extrabold tracking-tight text-white">Huellitas<span class="text-brand-400">POS</span></span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">PRO</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-medium block -mt-0.5">Pet Shops & Veterinarias</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+        <a href="#caracteristicas" class="hover:text-brand-400 transition-colors">Características</a>
+        <a href="#google-drive" class="hover:text-brand-400 transition-colors flex items-center gap-1.5">
+          <i data-lucide="cloud" class="w-4 h-4 text-emerald-400"></i> Google Drive Sync
+        </a>
+        <a href="#calculadora" class="hover:text-brand-400 transition-colors">Calculadora ROI</a>
+        <a href="#testimonios" class="hover:text-brand-400 transition-colors">Testimonios</a>
+        <a href="#precios" class="hover:text-brand-400 transition-colors">Planes</a>
+        <a href="#faq" class="hover:text-brand-400 transition-colors">Preguntas</a>
+      </nav>
+
+      <!-- Header CTAs -->
+      <div class="flex items-center gap-3">
+        <!-- Botón Ver Demo POS en vivo -->
+        <a href="index.html" target="_blank" class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white px-4 py-2.5 rounded-xl border border-white/10 hover:border-brand-500/40 bg-white/5 hover:bg-brand-500/10 transition-all">
+          <i data-lucide="smartphone" class="w-4 h-4 text-brand-400"></i>
+          <span>Probar App POS</span>
+        </a>
+
+        <!-- Botón Comenzar Gratis -->
+        <a href="#precios" class="relative group inline-flex items-center justify-center p-0.5 rounded-xl overflow-hidden font-bold text-xs text-white shadow-lg shadow-brand-500/25">
+          <span class="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 group-hover:opacity-90 transition-opacity"></span>
+          <span class="relative px-4 py-2.5 rounded-[10px] bg-dark-base flex items-center gap-2 group-hover:bg-transparent transition-colors">
+            <span>Comenzar Ahora</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-brand-400 group-hover:text-white group-hover:translate-x-0.5 transition-all"></i>
+          </span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="relative pt-36 pb-20 lg:pt-44 lg:pb-32 overflow-hidden bg-grid-pattern">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="text-center max-w-3xl mx-auto space-y-6">
+        
+        <!-- Social Proof Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card border border-brand-500/30 text-xs font-semibold text-brand-300 shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+          <span>El Software POS #1 para Pet Shops en Colombia 🇨🇴</span>
+          <span class="text-slate-500">•</span>
+          <span class="text-slate-300 flex items-center gap-1 font-mono text-[11px]">
+            <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i> 4.9/5
+          </span>
+        </div>
+
+        <!-- Main Headline -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.12]">
+          Vende más rápido, controla tu stock y 
+          <span class="gradient-text-emerald block mt-1">sincroniza en Google Drive.</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-base sm:text-lg text-slate-400 leading-relaxed font-normal max-w-2xl mx-auto">
+          Diseñado para tiendas de mascotas y veterinarias sin conocimientos técnicos. 
+          Punto de venta táctil en celular, semáforo de inventario bajo, clientes con WhatsApp y tablas mensuales organizadas en tu propio Drive.
+        </p>
+
+        <!-- CTA Buttons Group -->
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="#precios" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-emerald-500 to-teal-500 text-white font-extrabold text-sm shadow-xl shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5">
+            <i data-lucide="zap" class="w-4 h-4 fill-white"></i>
+            <span>Comenzar Prueba Gratis de 14 Días</span>
+          </a>
+
+          <a href="index.html" target="_blank" class="w-full sm:w-auto px-7 py-4 rounded-2xl glass-card hover:bg-white/10 text-white font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 group">
+            <i data-lucide="play-circle" class="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform"></i>
+            <span>Ver Demo Interactivo</span>
+          </a>
+        </div>
+
+        <!-- Micro Social Proof & Security Badges -->
+        <div class="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-medium">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4 text-brand-400"></i>
+            <span>Sin tarjeta de crédito</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4 text-brand-400"></i>
+            <span>Listo en 2 minutos</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4 text-brand-400"></i>
+            <span>Tus datos te pertenecen en Drive</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- HERO VISUAL MOCKUP: THE INTERACTIVE SHOWCASE (WOW FACTOR) -->
+      <div class="mt-16 lg:mt-24 relative max-w-5xl mx-auto">
+        
+        <!-- Glow Aura Under Mockup -->
+        <div class="absolute inset-0 bg-gradient-to-t from-brand-500/20 via-cyan-500/10 to-transparent blur-3xl -z-10 rounded-3xl"></div>
+
+        <!-- Glass Frame Container -->
+        <div class="p-3 sm:p-5 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-2xl">
+          
+          <!-- Mockup Top Bar -->
+          <div class="flex items-center justify-between pb-4 border-b border-white/5 px-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+              <span class="ml-2 text-xs font-mono text-slate-400 hidden sm:inline">huellitas-pos.app/dashboard</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Google Drive: NOV-2026 Conectado
+              </span>
+            </div>
+          </div>
+
+          <!-- Mockup Live Content Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-5">
+            
+            <!-- Left Column: KPI Live Cards & Charts (7 cols) -->
+            <div class="lg:col-span-7 space-y-4">
+              
+              <!-- Metrics Ribbon -->
+              <div class="grid grid-cols-3 gap-3">
+                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                  <span class="text-[11px] text-slate-400 block font-medium">Ventas Noviembre</span>
+                  <span class="text-lg font-extrabold text-white font-mono">$ 18.420.000</span>
+                  <span class="text-[10px] text-emerald-400 font-bold block mt-0.5">↑ +24.8% COP</span>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                  <span class="text-[11px] text-slate-400 block font-medium">Clientes Totales</span>
+                  <span class="text-lg font-extrabold text-white font-mono">1,428</span>
+                  <span class="text-[10px] text-indigo-400 font-bold block mt-0.5">+48 nuevos</span>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                  <span class="text-[11px] text-slate-400 block font-medium">Alertas Stock</span>
+                  <span class="text-lg font-extrabold text-rose-400 font-mono">2 críticas</span>
+                  <span class="text-[10px] text-rose-300 font-bold block mt-0.5">Semáforo activo</span>
+                </div>
+              </div>
+
+              <!-- Interactive Live Sync Simulation Card -->
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <i data-lucide="sheet" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold text-white">Rotación de Tablas Mensuales</h4>
+                      <p class="text-[10px] text-slate-400">Automatización ENE-FEB-MAR-AÑO</p>
+                    </div>
+                  </div>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">100% Automático</span>
+                </div>
+
+                <!-- Simulation Sheets Row -->
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                  <div class="p-2.5 rounded-xl bg-black/30 border border-white/5 flex items-center justify-between">
+                    <span class="text-slate-400">OCT-2026.gsheet</span>
+                    <span class="text-slate-500 text-[10px]">Cerrado</span>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-between">
+                    <span class="text-emerald-300 font-bold">NOV-2026.gsheet</span>
+                    <span class="text-emerald-400 text-[10px] flex items-center gap-1 font-bold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Escribiendo
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Activity Feed -->
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="activity" class="w-3.5 h-3.5 text-brand-400"></i> Últimas Ventas en Tiempo Real
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">Actualizado hace 2 seg</span>
+                </div>
+
+                <div class="space-y-2 text-xs">
+                  <div class="p-2.5 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base">🐕</span>
+                      <div>
+                        <span class="font-bold text-white block">Alimento Perro Adulto 15kg</span>
+                        <span class="text-[10px] text-slate-400">Cliente: Carlos Mendoza • WhatsApp listo</span>
+                      </div>
+                    </div>
+                    <span class="font-mono font-bold text-emerald-400">$ 185.000 COP</span>
+                  </div>
+
+                  <div class="p-2.5 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base">🐱</span>
+                      <div>
+                        <span class="font-bold text-white block">Alimento Gato Salmón 3kg</span>
+                        <span class="text-[10px] text-slate-400">Cliente: Valentina Gómez • Frecuente</span>
+                      </div>
+                    </div>
+                    <span class="font-mono font-bold text-emerald-400">$ 78.000 COP</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Interactive Android POS Preview (5 cols) -->
+            <div class="lg:col-span-5 flex justify-center">
+              <div class="w-full max-w-[290px] rounded-[32px] p-2 bg-slate-800 border-4 border-slate-700 shadow-2xl relative overflow-hidden">
+                
+                <!-- Phone Screen -->
+                <div class="bg-slate-50 rounded-[24px] p-3 text-slate-900 space-y-2.5 select-none">
+                  
+                  <!-- Screen Header -->
+                  <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                    <div class="flex items-center gap-1.5">
+                      <div class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+                        <i data-lucide="paw-print" class="w-3.5 h-3.5"></i>
+                      </div>
+                      <span class="text-xs font-black">Huellitas POS</span>
+                    </div>
+                    <span class="text-[9px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">EN VIVO</span>
+                  </div>
+
+                  <!-- Catalog Mini Grid -->
+                  <div class="space-y-1.5">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Toca para vender:</span>
+                    
+                    <div class="grid grid-cols-2 gap-1.5">
+                      <div onclick="simulateHeroClick(this, 185000)" class="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs cursor-pointer hover:border-emerald-500 transition-all active:scale-95 text-center">
+                        <span class="text-base block">🐕</span>
+                        <span class="text-[10px] font-bold block truncate">Alimento 15kg</span>
+                        <span class="text-[9px] font-mono text-emerald-700 font-extrabold">$ 185.000</span>
+                      </div>
+
+                      <div onclick="simulateHeroClick(this, 78000)" class="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs cursor-pointer hover:border-emerald-500 transition-all active:scale-95 text-center">
+                        <span class="text-base block">🐱</span>
+                        <span class="text-[10px] font-bold block truncate">Gato Salmón</span>
+                        <span class="text-[9px] font-mono text-emerald-700 font-extrabold">$ 78.000</span>
+                      </div>
+
+                      <div onclick="simulateHeroClick(this, 42000)" class="p-2 rounded-xl bg-rose-50 border border-rose-200 shadow-2xs cursor-pointer hover:border-rose-500 transition-all active:scale-95 text-center">
+                        <span class="text-base block">🛡️</span>
+                        <span class="text-[10px] font-bold block truncate text-rose-900">Pipeta Pulgas</span>
+                        <span class="text-[9px] font-mono text-rose-700 font-extrabold">Bajo: 1 unid</span>
+                      </div>
+
+                      <div onclick="simulateHeroClick(this, 18000)" class="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs cursor-pointer hover:border-emerald-500 transition-all active:scale-95 text-center">
+                        <span class="text-base block">🎾</span>
+                        <span class="text-[10px] font-bold block truncate">Pelota Mordillo</span>
+                        <span class="text-[9px] font-mono text-emerald-700 font-extrabold">$ 18.000</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Checkout Live Floating Button inside preview -->
+                  <div class="pt-1">
+                    <button id="hero-checkout-btn" onclick="simulateCheckout()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-between shadow-md transition-all active:scale-95">
+                      <span id="hero-cart-badge" class="px-1.5 py-0.5 bg-white/20 rounded font-mono text-[10px]">1 item</span>
+                      <span class="text-[11px]">Cobrar Venta</span>
+                      <span id="hero-cart-total" class="font-mono text-[11px] font-black">$ 185.000</span>
+                    </button>
+                    <p class="text-[9px] text-center text-slate-400 mt-1.5">⚡ Prueba tocando los productos arriba</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LOGOS / TRUST BANNER -->
+  <section class="py-12 border-y border-white/5 bg-slate-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
+        La plataforma elegida por las mejores tiendas y clínicas veterinarias
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+        <div class="flex items-center gap-2 font-black text-slate-300 text-lg">
+          <i data-lucide="dog" class="w-6 h-6 text-brand-400"></i> PetGourmet Co
+        </div>
+        <div class="flex items-center gap-2 font-black text-slate-300 text-lg">
+          <i data-lucide="stethoscope" class="w-6 h-6 text-cyan-400"></i> VetSalud Colombia
+        </div>
+        <div class="flex items-center gap-2 font-black text-slate-300 text-lg">
+          <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400"></i> DoggyCare Bogotá
+        </div>
+        <div class="flex items-center gap-2 font-black text-slate-300 text-lg">
+          <i data-lucide="heart-pulse" class="w-6 h-6 text-rose-400"></i> MascotaFeliz Medellín
+        </div>
+        <div class="flex items-center gap-2 font-black text-slate-300 text-lg">
+          <i data-lucide="package" class="w-6 h-6 text-amber-400"></i> SuperPet Express
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENTO GRID FEATURES SECTION -->
+  <section id="caracteristicas" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400">Ingeniería para tu Tranquilidad</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Todo lo que tu tienda de mascotas necesita, <span class="gradient-text-emerald">sin complicaciones.</span>
+        </h2>
+        <p class="text-sm text-slate-400">
+          Elimina los cuadres manuales en papel, los softwares pesados y el inventario descontrolado.
+        </p>
+      </div>
+
+      <!-- Bento Grid Layout -->
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-5">
+        
+        <!-- Bento 1: Mobile First POS (Large - 7 cols) -->
+        <div class="lg:col-span-7 p-6 sm:p-8 rounded-3xl glass-card glass-card-hover relative overflow-hidden flex flex-col justify-between">
+          <div class="space-y-3 max-w-md">
+            <div class="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center">
+              <i data-lucide="touchpad" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Punto de Venta Touch-First en tu Móvil</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Vende en mostrador o atiende domicilios directamente desde tu teléfono o tablet Android. Interfaz rápida, sin recargas de página y botón flotante de cobro instantáneo.
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-4 text-xs font-medium text-slate-400">
+            <span class="flex items-center gap-1.5"><i data-lucide="zap" class="w-4 h-4 text-brand-400"></i> Cobro en 3 toques</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="wifi-off" class="w-4 h-4 text-cyan-400"></i> Modo Offline listo</span>
+          </div>
+        </div>
+
+        <!-- Bento 2: Semáforo de Inventario (5 cols) -->
+        <div class="lg:col-span-5 p-6 sm:p-8 rounded-3xl glass-card glass-card-hover flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+              <i data-lucide="traffic-cone" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Semáforo de Stock Anti-Quiebre</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Puntos verdes para stock óptimo y alertas rojas parpadeantes cuando el producto llegue a su mínimo. Ajusta cantidades físicas con botones + y - al instante.
+            </p>
+          </div>
+
+          <div class="mt-6 p-3 rounded-2xl bg-black/30 border border-rose-500/20 flex items-center justify-between text-xs font-mono">
+            <span class="text-rose-300 font-bold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Alerta de Pipetas
+            </span>
+            <span class="text-rose-400">1 unidad restante</span>
+          </div>
+        </div>
+
+        <!-- Bento 3: Sincronización Google Drive (4 cols) -->
+        <div id="google-drive" class="lg:col-span-4 p-6 sm:p-8 rounded-3xl glass-card glass-card-hover space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <i data-lucide="folder-sync" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white">Tus Datos en Google Drive</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Nada de bases de datos cerradas. Tus clientes e inventario se guardan directamente en tu cuenta de Google Drive en hojas de cálculo mensuales (<span class="font-mono text-cyan-300">NOV-2026</span>, <span class="font-mono text-cyan-300">DIC-2026</span>).
+          </p>
+          <div class="pt-2">
+            <span class="text-xs font-bold text-cyan-400 flex items-center gap-1">
+              Descarga en Excel / CSV en 1 clic <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Bento 4: Clientes & WhatsApp Directo (4 cols) -->
+        <div class="lg:col-span-4 p-6 sm:p-8 rounded-3xl glass-card glass-card-hover space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white">Clientes & WhatsApp Directo</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Captura el nombre y teléfono del cliente al cobrar. Con un solo clic abres WhatsApp con su número para enviar recordatorios de desparasitación o agradecer su compra.
+          </p>
+          <div class="pt-2">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+              Fidelización sin fricciones <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Bento 5: 100% Pesos Colombianos COP (4 cols) -->
+        <div class="lg:col-span-4 p-6 sm:p-8 rounded-3xl glass-card glass-card-hover space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="coins" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white">Hecho para Colombia (COP)</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Formatos numéricos oficiales (<span class="font-mono text-amber-300">$ 185.000 COP</span>), sin centavos absurdos, con selector de pago rápido para Efectivo, Tarjeta o transferencias Nequi/Daviplata.
+          </p>
+          <div class="pt-2">
+            <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
+              Sin enredos de divisas <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTERACTIVE ROI / CALCULATOR SECTION (CONVERSION BOOSTER) -->
+  <section id="calculadora" class="py-24 border-t border-white/5 bg-slate-900/40 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Calculator Left Explanation -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-bold">
+            <i data-lucide="calculator" class="w-3.5 h-3.5"></i> Calculadora de Ahorro
+          </div>
+
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            Descubre cuánto dinero y tiempo <span class="gradient-text-emerald">estás perdiendo hoy.</span>
+          </h2>
+
+          <p class="text-sm text-slate-400 leading-relaxed">
+            El descontrol de inventario y los cuadres a mano provocan mermas del 4% en tiendas de mascotas. Mueve los controles y mira el impacto real de sistematizarte con Huellitas POS.
+          </p>
+
+          <div class="pt-2 space-y-3">
+            <div class="flex items-center gap-3 text-sm text-slate-300">
+              <i data-lucide="shield-check" class="w-5 h-5 text-brand-400 shrink-0"></i>
+              <span>Cero pérdidas por productos vencidos no rotados</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm text-slate-300">
+              <i data-lucide="clock" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+              <span>Cuadre de caja automático en menos de 30 segundos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator Interactive Box -->
+        <div class="lg:col-span-7 p-6 sm:p-8 rounded-3xl glass-card border border-brand-500/30 shadow-2xl relative">
+          
+          <div class="space-y-6">
+            
+            <!-- Slider 1: Ventas Diarias -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-sm">
+                <label class="font-bold text-white">Ventas diarias promedio (COP):</label>
+                <span id="calc-sales-display" class="font-mono font-extrabold text-brand-400 text-base">$ 1.200.000 COP</span>
+              </div>
+              <input id="calc-sales-slider" type="range" min="300000" max="8000000" step="100000" value="1200000" oninput="calculateSavings()" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>$ 300.000 COP</span>
+                <span>$ 8.000.000 COP</span>
+              </div>
+            </div>
+
+            <!-- Slider 2: Horas en Cuadre y Stock -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-sm">
+                <label class="font-bold text-white">Horas gastadas contando inventario y caja al día:</label>
+                <span id="calc-hours-display" class="font-mono font-extrabold text-cyan-400 text-base">2.0 horas</span>
+              </div>
+              <input id="calc-hours-slider" type="range" min="0.5" max="5" step="0.5" value="2.0" oninput="calculateSavings()" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>30 minutos</span>
+                <span>5 horas</span>
+              </div>
+            </div>
+
+            <!-- Output Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+              
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-brand-950/60 to-dark-card border border-brand-500/30">
+                <span class="text-xs font-semibold text-slate-400 block mb-1">Ahorro Mensual en Pérdidas Evitadas</span>
+                <span id="calc-money-saved" class="text-2xl font-black text-brand-400 font-mono block">$ 1.440.000 COP</span>
+                <span class="text-[10px] text-emerald-300 font-medium">Recuperado directamente a tu bolsillo</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/60 to-dark-card border border-cyan-500/30">
+                <span class="text-xs font-semibold text-slate-400 block mb-1">Tiempo Libre Recuperado al Mes</span>
+                <span id="calc-time-saved" class="text-2xl font-black text-cyan-400 font-mono block">48 Horas</span>
+                <span class="text-[10px] text-cyan-300 font-medium">Equivale a 6 días laborales al año</span>
+              </div>
+
+            </div>
+
+            <!-- Fast ROI Banner -->
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-5 h-5 text-amber-400"></i>
+                <span class="text-xs font-bold text-white">Retorno de Inversión (ROI): <span class="text-brand-400 font-mono">Más de 29x</span> el costo del plan</span>
+              </div>
+              <a href="#precios" class="text-xs font-extrabold text-brand-400 hover:text-brand-300 underline">Asegurar Ahorro</a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF / TESTIMONIALS (WALL OF LOVE) -->
+  <section id="testimonios" class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400">Historias Reales de Éxito</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Dueños de tiendas que transformaron su negocio
+        </h2>
+        <p class="text-sm text-slate-400">
+          Descubre por qué veterinarios y emprendedores no volverían a su sistema anterior.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Review 1 -->
+        <div class="p-6 rounded-3xl glass-card space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex text-amber-400 gap-1">
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              "Antes perdíamos bultos de comida porque no sabíamos qué teníamos en bodega. Con el semáforo rojo sabemos exactamente cuándo pedir. Y lo mejor: tener la tabla en mi Google Drive me da paz mental total."
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600 to-teal-500 text-white font-black text-xs flex items-center justify-center">
+              DR
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Dra. Rocío Mantilla</h4>
+              <p class="text-[11px] text-slate-400">Clínica Veterinaria San Roque • Bogotá</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="p-6 rounded-3xl glass-card space-y-4 flex flex-col justify-between border-brand-500/30">
+          <div class="space-y-3">
+            <div class="flex text-amber-400 gap-1">
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              "Manejamos 2 empleados en caja y ninguno sabía usar sistemas contables difíciles. Huellitas lo aprendieron en 5 minutos en el celular. Las ventas vuelan y a los clientes les encanta que les llegue WhatsApp."
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-500 text-white font-black text-xs flex items-center justify-center">
+              JA
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Julián Aristizábal</h4>
+              <p class="text-[11px] text-slate-400">Mundo Canino Pet Shop • Medellín</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="p-6 rounded-3xl glass-card space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex text-amber-400 gap-1">
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              "El orden mensual con NOV-2026 y OCT-2026 es una genialidad. Mi contador antes me pedía mil papeles, ahora solo entra al Drive compartido y tiene todas las ventas y clientes listos en Excel."
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-600 to-rose-500 text-white font-black text-xs flex items-center justify-center">
+              CP
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Carolina Pardo</h4>
+              <p class="text-[11px] text-slate-400">La Casa del Michi • Cali</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRICING SECTION (CLEAR & HIGH CONVERTING) -->
+  <section id="precios" class="py-24 border-t border-white/5 bg-slate-900/30 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-12 space-y-3">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400">Precios Transparentes</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Planes a la medida de tu crecimiento
+        </h2>
+        <p class="text-sm text-slate-400">
+          Sin cláusulas de permanencia. Empieza gratis hoy mismo y actualiza cuando quieras.
+        </p>
+
+        <!-- Billing Toggle -->
+        <div class="pt-4 flex items-center justify-center gap-3">
+          <span class="text-xs font-bold text-slate-400">Facturación Mensual</span>
+          <button id="billing-toggle-btn" onclick="toggleBilling()" class="w-14 h-7 rounded-full bg-slate-800 border border-white/10 p-1 transition-all relative flex items-center">
+            <div id="billing-circle" class="w-5 h-5 rounded-full bg-brand-500 transition-all translate-x-0 shadow-md"></div>
+          </button>
+          <span class="text-xs font-bold text-white flex items-center gap-1.5">
+            Facturación Anual 
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">Ahorra 20%</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Pricing Cards Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        
+        <!-- Plan 1: Emprendedor -->
+        <div class="p-8 rounded-3xl glass-card space-y-6 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Plan Inicial</h3>
+              <p class="text-xs text-slate-400 mt-1">Para tiendas pequeñas que inician su orden.</p>
+            </div>
+
+            <div class="py-2">
+              <span class="text-4xl font-black text-white font-mono">$ 0</span>
+              <span class="text-xs text-slate-400 font-semibold">/ siempre gratis</span>
+            </div>
+
+            <ul class="space-y-2.5 text-xs text-slate-300 font-medium">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Hasta 20 productos en catálogo</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Punto de venta móvil táctil</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Directorio de clientes en dispositivo</li>
+              <li class="flex items-center gap-2 text-slate-500"><i data-lucide="x" class="w-4 h-4 shrink-0"></i> Sincronización continua en Google Drive</li>
+            </ul>
+          </div>
+
+          <a href="index.html" class="w-full py-3.5 rounded-xl border border-white/10 hover:border-white/30 text-white font-bold text-xs text-center block transition-all">
+            Empezar Gratis
+          </a>
+        </div>
+
+        <!-- Plan 2: PRO (Featured / Most Popular) -->
+        <div class="p-8 rounded-3xl glass-card border-2 border-brand-500/60 relative flex flex-col justify-between shadow-2xl shadow-brand-500/10">
+          
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-brand-600 to-teal-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md">
+            MÁS POPULAR • EL FAVORITO
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                Plan Pet Shop PRO
+                <span class="text-xs">⚡</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">El estándar definitivo para tiendas y veterinarias.</p>
+            </div>
+
+            <div class="py-2">
+              <span id="price-pro" class="text-4xl font-black text-brand-400 font-mono">$ 49.000</span>
+              <span id="price-pro-period" class="text-xs text-slate-400 font-semibold">/ mes COP</span>
+            </div>
+
+            <ul class="space-y-2.5 text-xs text-slate-300 font-medium">
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> <strong>Productos y ventas ilimitadas</strong></li>
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> <strong>Sincronización en vivo con Google Drive</strong></li>
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> <strong>Rotación mensual automática (NOV-2026, DIC-2026)</strong></li>
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> Semáforo inteligente de inventario y alertas</li>
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> Panel de Administrador con clave PIN</li>
+              <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-brand-400 shrink-0"></i> Soporte prioritario por WhatsApp</li>
+            </ul>
+          </div>
+
+          <div class="pt-6">
+            <a href="abrir_petshop_pos.bat" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 via-emerald-500 to-teal-500 text-white font-extrabold text-sm text-center block shadow-lg shadow-brand-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              Activar Prueba de 14 Días
+            </a>
+            <p class="text-[10px] text-center text-slate-400 mt-2">Cancela cuando quieras con 1 clic</p>
+          </div>
+        </div>
+
+        <!-- Plan 3: Multi-Sede / Clínica -->
+        <div class="p-8 rounded-3xl glass-card space-y-6 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Clínica & Franquicias</h3>
+              <p class="text-xs text-slate-400 mt-1">Para negocios con varias sucursales o quirófano.</p>
+            </div>
+
+            <div class="py-2">
+              <span id="price-multi" class="text-4xl font-black text-white font-mono">$ 99.000</span>
+              <span id="price-multi-period" class="text-xs text-slate-400 font-semibold">/ mes COP</span>
+            </div>
+
+            <ul class="space-y-2.5 text-xs text-slate-300 font-medium">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Todo lo del Plan PRO</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Hasta 5 sedes o dispositivos simultáneos</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Módulo de historia clínica e historias de vacunación</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-400 shrink-0"></i> Asesor dedicado para configuración</li>
+            </ul>
+          </div>
+
+          <a href="https://wa.me/573000000000?text=Hola,%20deseo%20informacion%20del%20Plan%20Clinica%20de%20Huellitas%20POS" target="_blank" class="w-full py-3.5 rounded-xl border border-white/10 hover:border-white/30 text-white font-bold text-xs text-center block transition-all">
+            Hablar con Asesor
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTERACTIVE FAQ SECTION (ACCORDION) -->
+  <section id="faq" class="py-24 relative">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-16 space-y-3">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-400">Preguntas Frecuentes</span>
+        <h2 class="text-3xl font-extrabold text-white">¿Tienes dudas? Te las resolvemos</h2>
+      </div>
+
+      <div class="space-y-3">
+        
+        <!-- FAQ 1 -->
+        <div class="rounded-2xl glass-card overflow-hidden">
+          <button onclick="toggleFaq(1)" class="w-full p-5 text-left font-bold text-sm text-white flex justify-between items-center gap-4">
+            <span>¿Cómo funciona la sincronización con Google Drive?</span>
+            <i id="faq-icon-1" data-lucide="chevron-down" class="w-4 h-4 text-brand-400 transition-transform"></i>
+          </button>
+          <div id="faq-content-1" class="hidden px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/5 pt-3">
+            Tus datos no quedan atrapados en servidores cerrados. La app se conecta directamente con tu cuenta de Google Drive personal y guarda dos pestañas: <strong>Inventario</strong> y <strong>Clientes</strong>. Además, organiza una hoja nueva cada mes automáticamente (<span class="font-mono text-emerald-400">OCT-2026</span>, <span class="font-mono text-emerald-400">NOV-2026</span>, etc.).
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="rounded-2xl glass-card overflow-hidden">
+          <button onclick="toggleFaq(2)" class="w-full p-5 text-left font-bold text-sm text-white flex justify-between items-center gap-4">
+            <span>¿Puedo usarlo si se cae el internet en la tienda?</span>
+            <i id="faq-icon-2" data-lucide="chevron-down" class="w-4 h-4 text-brand-400 transition-transform"></i>
+          </button>
+          <div id="faq-content-2" class="hidden px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/5 pt-3">
+            <strong>Sí, 100%.</strong> Huellitas POS utiliza tecnología PWA con almacenamiento persistente local en tu dispositivo (<span class="font-mono text-cyan-300">localStorage</span>). Puedes seguir cobrando, registrando clientes y modificando stock sin conexión; cuando el internet regrese, se sincroniza con Google Drive.
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="rounded-2xl glass-card overflow-hidden">
+          <button onclick="toggleFaq(3)" class="w-full p-5 text-left font-bold text-sm text-white flex justify-between items-center gap-4">
+            <span>¿Necesito comprar computadores o pistolas de código de barras costosas?</span>
+            <i id="faq-icon-3" data-lucide="chevron-down" class="w-4 h-4 text-brand-400 transition-transform"></i>
+          </button>
+          <div id="faq-content-3" class="hidden px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/5 pt-3">
+            <strong>No necesitas comprar nada extra.</strong> La aplicación está diseñada bajo el estándar Mobile-First para funcionar con total fluidez en cualquier teléfono o tablet Android de gama básica o media, además de computadores portátiles o de escritorio.
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="rounded-2xl glass-card overflow-hidden">
+          <button onclick="toggleFaq(4)" class="w-full p-5 text-left font-bold text-sm text-white flex justify-between items-center gap-4">
+            <span>¿Por qué está en Pesos Colombianos (COP)?</span>
+            <i id="faq-icon-4" data-lucide="chevron-down" class="w-4 h-4 text-brand-400 transition-transform"></i>
+          </button>
+          <div id="faq-content-4" class="hidden px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-white/5 pt-3">
+            Porque la mayoría de softwares importados muestran centavos o dólares confusos. Huellitas POS formatea de acuerdo a las normas colombianas: separador de miles con punto, sin decimales y con soporte nativo para pagos en Efectivo, Tarjeta, Nequi y Daviplata.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FINAL CALL TO ACTION BANNER -->
+  <section class="py-20 relative overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="p-8 sm:p-14 rounded-3xl bg-gradient-to-r from-brand-900/80 via-emerald-900/60 to-dark-card border border-brand-500/40 shadow-2xl text-center space-y-6 relative overflow-hidden">
+        
+        <!-- Ambient Sparkles -->
+        <div class="w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl absolute -top-10 -left-10 pointer-events-none"></div>
+
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-brand-300 text-xs font-bold">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Transforma tu tienda hoy
+        </span>
+
+        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          Deja de preocuparte por el desorden.<br />
+          <span class="gradient-text-emerald">Haz crecer tu pet shop con tranquilidad.</span>
+        </h2>
+
+        <p class="text-sm sm:text-base text-slate-300 max-w-xl mx-auto font-normal">
+          Únete a más de 1,450 emprendedores en toda Colombia que ya simplificaron sus ventas e inventario con Huellitas POS.
+        </p>
+
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="#precios" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-slate-900 font-extrabold text-sm shadow-xl hover:bg-slate-100 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            Empezar Prueba Gratuita
+          </a>
+
+          <a href="index.html" class="w-full sm:w-auto px-8 py-4 rounded-2xl glass-card text-white font-bold text-sm border border-white/20 hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="smartphone" class="w-4 h-4 text-brand-400"></i> Probar en tu Pantalla
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/5 py-12 bg-dark-base text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-xl bg-brand-600 text-white flex items-center justify-center">
+          <i data-lucide="paw-print" class="w-4 h-4"></i>
+        </div>
+        <span class="text-sm font-bold text-slate-300">Huellitas POS PRO</span>
+        <span>• © 2026 Todos los derechos reservados.</span>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/icaro98007/TiendaMascotas" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub Repo
+        </a>
+        <a href="https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit" target="_blank" class="hover:text-white transition-colors flex items-center gap-1 text-emerald-400">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Ver Hoja NOV-2026
+        </a>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- FLOATING WHATSAPP BUTTON -->
+  <a href="https://wa.me/573000000000?text=Hola,%20deseo%20informacion%20de%20Huellitas%20POS" target="_blank" class="fixed bottom-6 right-6 z-50 p-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-all flex items-center justify-center">
+    <i data-lucide="message-circle" class="w-6 h-6"></i>
+  </a>
+
+  <!-- VANILLA JAVASCRIPT CONTROLLERS -->
+  <script>
+    // Inicializar Iconos Lucide
+    lucide.createIcons();
+
+    // 1. Calculadora de Ahorro ROI Dinámica
+    function calculateSavings() {
+      const salesSlider = document.getElementById('calc-sales-slider');
+      const hoursSlider = document.getElementById('calc-hours-slider');
+      
+      const salesVal = parseFloat(salesSlider.value);
+      const hoursVal = parseFloat(hoursSlider.value);
+
+      document.getElementById('calc-sales-display').textContent = '$ ' + Math.round(salesVal).toLocaleString('es-CO') + ' COP';
+      document.getElementById('calc-hours-display').textContent = hoursVal.toFixed(1) + ' horas';
+
+      // 4% promedio de mermas y errores evitados al mes (30 días)
+      const monthlySales = salesVal * 30;
+      const moneySaved = monthlySales * 0.04;
+      document.getElementById('calc-money-saved').textContent = '$ ' + Math.round(moneySaved).toLocaleString('es-CO') + ' COP';
+
+      // Horas ahorradas al mes (80% del tiempo de conteo y cuadre eliminado)
+      const monthlyHoursSaved = Math.round(hoursVal * 30 * 0.8);
+      document.getElementById('calc-time-saved').textContent = monthlyHoursSaved + ' Horas';
+    }
+
+    // 2. Facturación Anual / Mensual Toggle
+    let isAnnual = false;
+    function toggleBilling() {
+      isAnnual = !isAnnual;
+      const circle = document.getElementById('billing-circle');
+      const pricePro = document.getElementById('price-pro');
+      const priceMulti = document.getElementById('price-multi');
+
+      if (isAnnual) {
+        circle.classList.add('translate-x-7');
+        circle.classList.remove('translate-x-0');
+        pricePro.textContent = '$ 39.200';
+        priceMulti.textContent = '$ 79.200';
+      } else {
+        circle.classList.remove('translate-x-7');
+        circle.classList.add('translate-x-0');
+        pricePro.textContent = '$ 49.000';
+        priceMulti.textContent = '$ 99.000';
+      }
+    }
+
+    // 3. Acordeón FAQ
+    function toggleFaq(id) {
+      const content = document.getElementById(`faq-content-${id}`);
+      const icon = document.getElementById(`faq-icon-${id}`);
+      
+      const isHidden = content.classList.contains('hidden');
+      if (isHidden) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+      lucide.createIcons();
+    }
+
+    // 4. Simulación Interactiva en Mockup del Hero
+    let heroCartItems = 1;
+    let heroCartTotal = 185000;
+
+    function simulateHeroClick(el, price) {
+      heroCartItems += 1;
+      heroCartTotal += price;
+      
+      el.classList.add('ring-2', 'ring-emerald-500', 'scale-95');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500', 'scale-95'), 200);
+
+      const badge = document.getElementById('hero-cart-badge');
+      const total = document.getElementById('hero-cart-total');
+
+      badge.textContent = `${heroCartItems} items`;
+      total.textContent = '$ ' + Math.round(heroCartTotal).toLocaleString('es-CO');
+
+      // Animación en botón cobrar
+      const btn = document.getElementById('hero-checkout-btn');
+      btn.classList.add('scale-105');
+      setTimeout(() => btn.classList.remove('scale-105'), 150);
+    }
+
+    function simulateCheckout() {
+      const btn = document.getElementById('hero-checkout-btn');
+      btn.innerHTML = '<span>¡Venta Cobrada! ☁️ Sincronizando...</span>';
+      btn.classList.add('bg-slate-900');
+      
+      setTimeout(() => {
+        heroCartItems = 0;
+        heroCartTotal = 0;
+        btn.classList.remove('bg-slate-900');
+        btn.innerHTML = `
+          <span id="hero-cart-badge" class="px-1.5 py-0.5 bg-white/20 rounded font-mono text-[10px]">0 items</span>
+          <span class="text-[11px]">Cobrar Venta</span>
+          <span id="hero-cart-total" class="font-mono text-[11px] font-black">$ 0</span>
+        `;
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

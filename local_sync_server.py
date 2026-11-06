@@ -90,8 +90,19 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        # Si entra a la raíz o a index.html, servir la aplicación completa
-        if self.path in ['/', '/index.html']:
+        landing_file = os.path.join(os.path.dirname(__file__), "landing.html")
+        if self.path in ['/landing', '/landing.html']:
+            if os.path.exists(landing_file):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                with open(landing_file, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+
+        # Si entra a la raíz o a index.html, servir la aplicación POS completa
+        if self.path in ['/', '/index.html', '/app', '/pos']:
             if os.path.exists(HTML_FILE):
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/html; charset=utf-8')
