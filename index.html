@@ -515,19 +515,39 @@
                 </div>
               </div>
 
-              <!-- Acceso directo al archivo en Google Drive -->
-              <div class="p-2 bg-emerald-50/80 rounded-xl border border-emerald-200/80 flex items-center justify-between">
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 shrink-0"></i>
-                  <div class="truncate">
-                    <span class="text-[11px] font-bold text-emerald-950 block truncate">Tienda Mascotas - Inventario y Clientes</span>
-                    <span class="text-[9px] text-emerald-700 font-medium">Hojas: 'Inventario' y 'Clientes'</span>
+              <!-- Acceso directo a la tabla mensual activa en Google Drive -->
+              <div class="p-2.5 bg-emerald-50/90 rounded-xl border border-emerald-200 flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <i data-lucide="calendar" class="w-4 h-4 text-emerald-700 shrink-0"></i>
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-black text-emerald-950 font-mono" id="admin-current-month-badge">NOV-2026</span>
+                        <span class="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-600 text-white rounded">Mes Activo</span>
+                      </div>
+                      <span class="text-[10px] text-emerald-800 font-medium">Hojas: 'Inventario' y 'Clientes'</span>
+                    </div>
+                  </div>
+                  <a id="btn-open-drive-sheet" href="https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit" target="_blank" class="shrink-0 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg tap-effect flex items-center gap-1 shadow-xs">
+                    <span>Abrir Hoja</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                </div>
+
+                <!-- Historial de Meses en Drive -->
+                <div class="pt-1.5 border-t border-emerald-200/60 flex items-center justify-between text-[10px]">
+                  <span class="font-bold text-slate-500">Historial Mensual:</span>
+                  <div class="flex items-center gap-1.5">
+                    <a href="https://docs.google.com/spreadsheets/d/1V4iSAhAh7xM_1RWtODSNZ-Nix5ji7fF-CIKWlei3Ev0/edit" target="_blank" class="px-2 py-0.5 bg-white hover:bg-slate-100 rounded border border-slate-200 font-mono font-bold text-slate-700 flex items-center gap-1 tap-effect shadow-2xs">
+                      <span>OCT-2026</span>
+                      <i data-lucide="external-link" class="w-2.5 h-2.5 text-slate-400"></i>
+                    </a>
+                    <a href="https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit" target="_blank" class="px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded border border-emerald-300 font-mono font-bold flex items-center gap-1 tap-effect shadow-2xs">
+                      <span>NOV-2026</span>
+                      <i data-lucide="external-link" class="w-2.5 h-2.5 text-emerald-600"></i>
+                    </a>
                   </div>
                 </div>
-                <a id="btn-open-drive-sheet" href="https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit" target="_blank" class="shrink-0 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg tap-effect flex items-center gap-1 shadow-xs">
-                  <span>Abrir</span>
-                  <i data-lucide="external-link" class="w-3 h-3"></i>
-                </a>
               </div>
             </div>
 
@@ -698,10 +718,18 @@
 
     let savedEmail = localStorage.getItem('huellitas_admin_email') || 'hge1232009@gmail.com';
 
+    function getCurrentMonthTitle() {
+      const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+      const d = new Date();
+      return `${months[d.getMonth()]}-${d.getFullYear()}`;
+    }
+
+    const currentMonthStr = getCurrentMonthTitle();
+
     let googleConfig = {
       connected: true,
       email: savedEmail,
-      sheetName: 'Tienda Mascotas - Inventario y Clientes',
+      sheetName: currentMonthStr,
       sheetId: '1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE',
       folderName: 'Tienda mascotas',
       sheetUrl: 'https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit',
@@ -1087,7 +1115,8 @@ function doGet(e) {
       const syncPayload = {
         timestamp: new Date().toISOString(),
         store: "Huellitas Pet POS",
-        sheet: googleConfig.sheetName,
+        monthTitle: getCurrentMonthTitle(),
+        sheet: getCurrentMonthTitle(),
         tables: {
           inventario: products.map(p => ({
             id: p.id,

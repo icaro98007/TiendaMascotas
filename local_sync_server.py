@@ -1,14 +1,89 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import subprocess
+import datetime
 import json
+import re
 import os
 
-SPREADSHEET_ID = "1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE"
+MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
+MAPPING_FILE = os.path.join(os.path.dirname(__file__), "monthly_sheets.json")
+
+def get_current_month_title():
+    now = datetime.datetime.now()
+    return f"{MONTHS[now.month - 1]}-{now.year}"
 
 def run_cmd(args):
     cmd = ["gsheets"] + args
     result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
     return result.returncode == 0, result.stdout, result.stderr
+
+def load_sheet_mapping():
+    if os.path.exists(MAPPING_FILE):
+        try:
+            with open(MAPPING_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "OCT-2026": "1V4iSAhAh7xM_1RWtODSNZ-Nix5ji7fF-CIKWlei3Ev0",
+        "NOV-2026": "1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE"
+    }
+
+def save_sheet_mapping(mapping):
+    try:
+        with open(MAPPING_FILE, "w", encoding="utf-8") as f:
+            json.dump(mapping, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print("Error guardando mapa de hojas:", e)
+
+def get_or_create_monthly_sheet(month_title=None):
+    if not month_title:
+        month_title = get_current_month_title()
+
+    mapping = load_sheet_mapping()
+    if month_title in mapping:
+        return mapping[month_title]
+
+    print(f"\n[AUTO-MES] No se encontró hoja para '{month_title}'. Verificando en Google Drive...")
+    ok, out, _ = run_cmd(["readonly", "list", month_title])
+    if ok and month_title in out:
+        # Extraer ID con regex
+        match = re.search(r"(\b[a-zA-Z0-9_-]{35,}\b)", out)
+        if match:
+            found_id = match.group(1)
+            print(f" -> Encontrada hoja existente '{month_title}': {found_id}")
+            mapping[month_title] = found_id
+            save_sheet_mapping(mapping)
+            return found_id
+
+    # Si no existe, crear la hoja para el nuevo mes automáticamente
+    print(f"[AUTO-MES] Creando nueva hoja mensual '{month_title}' en Google Drive...")
+    ok, out, err = run_cmd(["mutate", "create", month_title, "--json"])
+    if not ok:
+        print(f"Error creando hoja mensual: {err}")
+        return mapping.get("NOV-2026", "1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE")
+
+    match = re.search(r"ID:\s*([a-zA-Z0-9_-]+)", out)
+    if not match:
+        match = re.search(r"\"spreadsheetId\":\s*\"([^\"]+)\"", out)
+    
+    if match:
+        new_id = match.group(1)
+        print(f" -> Creada exitosamente hoja '{month_title}': {new_id}")
+
+        # Configurar pestañas Inventario y Clientes
+        run_cmd(["mutate", "rename-sheet", new_id, "--sheet-id", "0", "--title", "Inventario"])
+        run_cmd(["mutate", "add-sheet", new_id, "--title", "Clientes"])
+        
+        # Formatos iniciales
+        run_cmd(["mutate", "format", new_id, "--sheet-id", "0", "--start-row", "0", "--end-row", "1", "--start-col", "0", "--end-col", "7", "--bold", "--align", "CENTER", "--bg-color", "#059669", "--fg-color", "#FFFFFF"])
+        run_cmd(["mutate", "freeze", new_id, "--sheet-id", "0", "--rows", "1"])
+
+        mapping[month_title] = new_id
+        save_sheet_mapping(mapping)
+        return new_id
+
+    return mapping.get("NOV-2026", "1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE")
 
 class SyncHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -19,11 +94,20 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        month_title = get_current_month_title()
+        sheet_id = get_or_create_monthly_sheet(month_title)
+        mapping = load_sheet_mapping()
+
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
-        self.wfile.write(json.dumps({"status": "online", "sheetId": SPREADSHEET_ID}).encode())
+        self.wfile.write(json.dumps({
+            "status": "online",
+            "currentMonth": month_title,
+            "activeSheetId": sheet_id,
+            "history": mapping
+        }).encode())
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
@@ -31,7 +115,10 @@ class SyncHandler(BaseHTTPRequestHandler):
         
         try:
             data = json.loads(post_data.decode('utf-8'))
-            print("Datos recibidos para sincronizar...")
+            month_title = data.get("monthTitle") or get_current_month_title()
+            sheet_id = get_or_create_monthly_sheet(month_title)
+
+            print(f"\n[SYNC] Sincronizando con tabla mensual '{month_title}' (ID: {sheet_id})...")
             
             # 1. Sincronizar Inventario
             if "tables" in data and "inventario" in data["tables"]:
@@ -44,7 +131,7 @@ class SyncHandler(BaseHTTPRequestHandler):
                 
                 inv_data = "|".join(inv_rows)
                 end_row = len(inv_rows)
-                run_cmd(["mutate", "write", SPREADSHEET_ID, f"Inventario!A1:G{end_row}", inv_data])
+                run_cmd(["mutate", "write", sheet_id, f"Inventario!A1:G{end_row}", inv_data])
                 print(f" -> Inventario actualizado ({len(prods)} productos)")
 
             # 2. Sincronizar Clientes
@@ -58,14 +145,18 @@ class SyncHandler(BaseHTTPRequestHandler):
                 
                 cli_data = "|".join(cli_rows)
                 end_row = len(cli_rows)
-                run_cmd(["mutate", "write", SPREADSHEET_ID, f"Clientes!A1:F{end_row}", cli_data])
+                run_cmd(["mutate", "write", sheet_id, f"Clientes!A1:F{end_row}", cli_data])
                 print(f" -> Clientes actualizados ({len(clis)} clientes)")
 
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "success"}).encode())
+            self.wfile.write(json.dumps({
+                "status": "success",
+                "month": month_title,
+                "sheetId": sheet_id
+            }).encode())
         except Exception as e:
             print("Error en sincronización:", e)
             self.send_response(500)
@@ -75,7 +166,7 @@ class SyncHandler(BaseHTTPRequestHandler):
 
 def run_server(port=5005):
     server = HTTPServer(('127.0.0.1', port), SyncHandler)
-    print(f"Servidor de Sincronización Huellitas POS iniciado en http://127.0.0.1:{port}")
+    print(f"Servidor Huellitas POS (Modo Mensual) iniciado en http://127.0.0.1:{port}")
     server.serve_forever()
 
 if __name__ == "__main__":
