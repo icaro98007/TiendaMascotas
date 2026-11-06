@@ -645,6 +645,67 @@
             </div>
           </div>
 
+          <!-- SECCIÓN: REPORTE DE VENTAS MENSUALES Y DIARIAS -->
+          <div class="p-3.5 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 rounded-2xl border border-indigo-100 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-xs">
+                  <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs font-black text-slate-900 leading-tight">Ventas Mensuales & Diarias</h4>
+                  <p class="text-[10px] text-slate-500 font-medium">Consolidado hasta la fecha</p>
+                </div>
+              </div>
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                Finanzas
+              </span>
+            </div>
+
+            <!-- Botón Desplegable con los meses que tienen tablas -->
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Mes con Tabla Registrada:</label>
+              <div class="relative">
+                <select id="admin-report-month-select" onchange="renderAdminSalesSummary(this.value)" class="w-full appearance-none text-xs font-black px-3 py-2.5 rounded-xl border border-indigo-200 bg-white text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 shadow-2xs cursor-pointer pr-8">
+                  <!-- Inyectado dinámicamente -->
+                </select>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjetas KPI del Mes Seleccionado -->
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Ventas Mes</span>
+                <span id="kpi-month-total" class="text-sm font-black font-mono text-emerald-600 block my-0.5">$ 0</span>
+                <span id="kpi-month-date-range" class="text-[9px] text-slate-500 font-medium block">1 al 6 de Nov (Hasta hoy)</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tickets Cobrados</span>
+                <span id="kpi-month-tickets" class="text-sm font-black font-mono text-slate-800 block my-0.5">0 ventas</span>
+                <span id="kpi-month-avg" class="text-[9px] text-indigo-600 font-bold block">Prom: $ 0 / día</span>
+              </div>
+            </div>
+
+            <!-- Lista Desglose de Ventas Diarias -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex items-center justify-between px-0.5">
+                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Ventas Diarias (Día a Día)</span>
+                <button onclick="exportDailySalesReportCSV()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 tap-effect bg-white px-2 py-0.5 rounded-lg border border-indigo-100 shadow-2xs">
+                  <i data-lucide="download" class="w-3 h-3"></i>
+                  <span>CSV Diario</span>
+                </button>
+              </div>
+
+              <!-- Contenedor scroll de los días -->
+              <div id="admin-daily-sales-container" class="max-h-48 overflow-y-auto no-scrollbar space-y-1.5 pr-0.5">
+                <!-- Se inyectan las tarjetas diarias -->
+              </div>
+            </div>
+          </div>
+
           <!-- SECCIÓN 3: ACCIONES DE SINCRONIZACIÓN -->
           <div class="space-y-2 pt-1">
             <button onclick="syncAllToGoogleDrive()" id="btn-sync-drive" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-black text-xs tap-effect shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
@@ -861,11 +922,72 @@
       }
     ];
 
+    // Historial consolidado de ventas y mapa de meses con tablas
+    let salesHistory = [];
+    let monthlySheetsMap = {
+      "OCT-2026": "1V4iSAhAh7xM_1RWtODSNZ-Nix5ji7fF-CIKWlei3Ev0",
+      "NOV-2026": "1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE"
+    };
+    let selectedReportMonth = "NOV-2026";
+
+    function generateInitialSalesHistory() {
+      const history = [];
+
+      // Días de Noviembre 2026 hasta la fecha (1 al 6 de Noviembre)
+      const novDays = [
+        { day: '01/11/2026', total: 469000, tickets: 4, client: "Valentina Gómez" },
+        { day: '02/11/2026', total: 538000, tickets: 5, client: "Carlos Mendoza" },
+        { day: '03/11/2026', total: 468500, tickets: 5, client: "Andrés Restrepo" },
+        { day: '04/11/2026', total: 674000, tickets: 7, client: "Mariana Torres" },
+        { day: '05/11/2026', total: 580000, tickets: 6, client: "Laura Suárez" },
+        { day: '06/11/2026', total: 390000, tickets: 4, client: "Consumidor Final" }
+      ];
+
+      novDays.forEach((d, idx) => {
+        for (let i = 0; i < d.tickets; i++) {
+          const sub = Math.round(d.total / d.tickets);
+          history.push({
+            id: 1000 + idx * 10 + i,
+            date: d.day,
+            time: `1${i}:${20 + i * 5}`,
+            month: "NOV-2026",
+            total: i === d.tickets - 1 ? d.total - sub * (d.tickets - 1) : sub,
+            method: i % 2 === 0 ? "Efectivo" : "Transferencia / Nequi",
+            clientName: i === 0 ? d.client : "Cliente Mostrador",
+            clientPhone: "+57 310 " + (100000 + idx * 100 + i)
+          });
+        }
+      });
+
+      // Días de Octubre 2026 (Mes completo: 31 días)
+      for (let day = 1; day <= 31; day++) {
+        const dayStr = (day < 10 ? '0' + day : '' + day) + '/10/2026';
+        const numTickets = 3 + (day % 5); // 3 a 7 tickets
+        const dayTotal = 320000 + ((day * 37) % 380000);
+        for (let t = 0; t < numTickets; t++) {
+          const sub = Math.round(dayTotal / numTickets);
+          history.push({
+            id: 2000 + day * 10 + t,
+            date: dayStr,
+            time: `1${t}:${15 + t * 6}`,
+            month: "OCT-2026",
+            total: t === numTickets - 1 ? dayTotal - sub * (numTickets - 1) : sub,
+            method: t % 2 === 0 ? "Efectivo" : "Datafono / Tarjeta",
+            clientName: "Cliente Octubre",
+            clientPhone: "+57 300 000 0000"
+          });
+        }
+      }
+
+      return history;
+    }
+
     // Persistencia Local (localStorage en dispositivo)
     function saveLocalData() {
       try {
         localStorage.setItem('huellitas_products', JSON.stringify(products));
         localStorage.setItem('huellitas_clients', JSON.stringify(clients));
+        localStorage.setItem('huellitas_sales', JSON.stringify(salesHistory));
       } catch (e) {
         console.warn("No se pudo escribir en localStorage:", e);
       }
@@ -903,11 +1025,20 @@
             }));
           }
         }
+        const savedSales = localStorage.getItem('huellitas_sales');
+        if (savedSales) {
+          const parsedSales = JSON.parse(savedSales);
+          if (Array.isArray(parsedSales) && parsedSales.length) salesHistory = parsedSales;
+          else salesHistory = generateInitialSalesHistory();
+        } else {
+          salesHistory = generateInitialSalesHistory();
+        }
       } catch (e) {
         console.warn("No se pudo cargar desde localStorage:", e);
       }
     }
     loadLocalData();
+    fetchMonthlySheetsFromLocalServer();
 
     /**
      * =========================================================================
@@ -1025,6 +1156,188 @@
         }
         if (toggleBtn) toggleBtn.textContent = 'Conectar';
       }
+
+      // Actualizar reporte de ventas mensuales y diarias
+      populateAdminMonthDropdown();
+      renderAdminSalesSummary(selectedReportMonth);
+    }
+
+    /**
+     * =========================================================================
+     * REPORTE FINANCIERO: VENTAS MENSUALES Y DIARIAS
+     * =========================================================================
+     */
+    function fetchMonthlySheetsFromLocalServer() {
+      fetch('http://127.0.0.1:5005/status')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.history) {
+            monthlySheetsMap = { ...monthlySheetsMap, ...data.history };
+            populateAdminMonthDropdown();
+          }
+        })
+        .catch(() => {});
+    }
+
+    function populateAdminMonthDropdown() {
+      const select = document.getElementById('admin-report-month-select');
+      if (!select) return;
+
+      const currentMonth = getCurrentMonthTitle();
+      const months = Object.keys(monthlySheetsMap);
+      if (!months.includes(currentMonth)) months.unshift(currentMonth);
+
+      // Ordenar: Mes actual primero, luego meses anteriores
+      months.sort((a, b) => (a === currentMonth ? -1 : (b === currentMonth ? 1 : b.localeCompare(a))));
+
+      select.innerHTML = months.map(m => {
+        const isCurrent = m === currentMonth;
+        const label = isCurrent ? `📅 ${m} (Mes Actual en Curso)` : `📁 ${m} (Mes Registrado)`;
+        return `<option value="${m}" ${m === selectedReportMonth ? 'selected' : ''}>${label}</option>`;
+      }).join('');
+    }
+
+    function renderAdminSalesSummary(monthTitle) {
+      if (!monthTitle) monthTitle = selectedReportMonth || getCurrentMonthTitle();
+      selectedReportMonth = monthTitle;
+
+      const currentMonth = getCurrentMonthTitle();
+      const monthSales = salesHistory.filter(s => s.month === monthTitle);
+
+      // Agrupar ventas por día
+      const dailyMap = {};
+      monthSales.forEach(s => {
+        if (!dailyMap[s.date]) {
+          dailyMap[s.date] = { date: s.date, total: 0, tickets: 0 };
+        }
+        dailyMap[s.date].total += Number(s.total || 0);
+        dailyMap[s.date].tickets += 1;
+      });
+
+      // Ordenar fechas de la más reciente a la más antigua
+      const dailyList = Object.values(dailyMap).sort((a, b) => {
+        const parseD = dStr => {
+          const [d, m, y] = dStr.split('/').map(Number);
+          return new Date(y, m - 1, d).getTime();
+        };
+        return parseD(b.date) - parseD(a.date);
+      });
+
+      const totalMonthSales = monthSales.reduce((acc, s) => acc + Number(s.total || 0), 0);
+      const totalTickets = monthSales.length;
+      const daysCount = dailyList.length || 1;
+      const dailyAvg = Math.round(totalMonthSales / daysCount);
+
+      // Actualizar tarjetas KPI
+      const kpiTotal = document.getElementById('kpi-month-total');
+      const kpiTickets = document.getElementById('kpi-month-tickets');
+      const kpiAvg = document.getElementById('kpi-month-avg');
+      const kpiRange = document.getElementById('kpi-month-date-range');
+
+      if (kpiTotal) kpiTotal.textContent = formatCOP(totalMonthSales);
+      if (kpiTickets) kpiTickets.textContent = `${totalTickets} ${totalTickets === 1 ? 'venta' : 'ventas'}`;
+      if (kpiAvg) kpiAvg.textContent = `Prom: ${formatCOP(dailyAvg)} / día`;
+      if (kpiRange) {
+        if (monthTitle === currentMonth) {
+          const todayNum = new Date().getDate();
+          kpiRange.textContent = `1 al ${todayNum} de ${monthTitle.split('-')[0]} (Hasta hoy)`;
+        } else {
+          kpiRange.textContent = `Mes completo (${daysCount} días registrados)`;
+        }
+      }
+
+      // Renderizar filas de ventas diarias
+      const container = document.getElementById('admin-daily-sales-container');
+      if (!container) return;
+
+      if (dailyList.length === 0) {
+        container.innerHTML = `
+          <div class="py-6 text-center text-slate-400">
+            <i data-lucide="calendar-x" class="w-6 h-6 mx-auto mb-1 text-slate-300"></i>
+            <p class="text-[11px] font-semibold">No hay ventas registradas en ${monthTitle}</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const maxSalesDay = Math.max(...dailyList.map(d => d.total), 1);
+      const todayStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      container.innerHTML = dailyList.map(d => {
+        const isToday = d.date === todayStr;
+        const pct = Math.min(100, Math.round((d.total / maxSalesDay) * 100));
+
+        // Formatear día con nombre del día
+        const [day, m, y] = d.date.split('/').map(Number);
+        const dayDate = new Date(y, m - 1, day);
+        const dayName = dayDate.toLocaleDateString('es-ES', { weekday: 'short' });
+        const capDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+
+        return `
+          <div class="p-2.5 bg-white rounded-xl border ${isToday ? 'border-emerald-300 bg-emerald-50/40 ring-1 ring-emerald-200' : 'border-slate-200/80'} shadow-2xs space-y-1.5 transition-all">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-extrabold text-slate-800 font-mono">${capDayName} ${d.date}</span>
+                ${isToday ? '<span class="text-[8px] font-black px-1.5 py-0.2 bg-emerald-600 text-white rounded shadow-2xs">HOY</span>' : ''}
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-black font-mono text-slate-900">${formatCOP(d.total)}</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[9px] text-slate-500 font-medium">
+              <span>${d.tickets} ${d.tickets === 1 ? 'ticket' : 'tickets'} • Prom: ${formatCOP(Math.round(d.total / d.tickets))}</span>
+              <span class="font-bold text-indigo-600 font-mono">${pct}% del pico</span>
+            </div>
+            <!-- Barra de Progreso Visual Proporcional -->
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full ${isToday ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-indigo-500 to-indigo-400'} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function exportDailySalesReportCSV() {
+      const monthTitle = selectedReportMonth || getCurrentMonthTitle();
+      const monthSales = salesHistory.filter(s => s.month === monthTitle);
+
+      const dailyMap = {};
+      monthSales.forEach(s => {
+        if (!dailyMap[s.date]) {
+          dailyMap[s.date] = { date: s.date, total: 0, tickets: 0 };
+        }
+        dailyMap[s.date].total += Number(s.total || 0);
+        dailyMap[s.date].tickets += 1;
+      });
+
+      const dailyList = Object.values(dailyMap).sort((a, b) => {
+        const [d1, m1, y1] = a.date.split('/').map(Number);
+        const [d2, m2, y2] = b.date.split('/').map(Number);
+        return new Date(y1, m1 - 1, d1).getTime() - new Date(y2, m2 - 1, d2).getTime();
+      });
+
+      let csv = "\uFEFFFecha;DiaSemana;TicketsCobrados;TotalVentasCOP;TicketPromedioCOP\n";
+      dailyList.forEach(d => {
+        const [day, m, y] = d.date.split('/').map(Number);
+        const dayDate = new Date(y, m - 1, day);
+        const dayName = dayDate.toLocaleDateString('es-ES', { weekday: 'long' });
+        const avg = Math.round(d.total / d.tickets);
+        csv += `"${d.date}";"${dayName}";"${d.tickets}";"${d.total}";"${avg}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ventas_diarias_${monthTitle}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSuccessChime();
+      showToast(`Reporte diario de ${monthTitle} descargado`, 'download');
     }
 
     function toggleGoogleConnection() {
@@ -1876,6 +2189,21 @@ function doGet(e) {
       }
 
       const totalPaid = getCartTotalPrice();
+      const itemsCount = getCartTotalCount();
+
+      // Registrar venta en historial analítico
+      const now = new Date();
+      salesHistory.unshift({
+        id: Date.now(),
+        date: now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        month: getCurrentMonthTitle(),
+        total: totalPaid,
+        method: selectedPayment,
+        clientName: clientName,
+        clientPhone: clientPhone,
+        itemsCount: itemsCount
+      });
 
       // Deducir stock del inventario en memoria
       for (const [idStr, qty] of Object.entries(cart)) {
