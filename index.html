@@ -524,19 +524,46 @@
             </div>
 
             <!-- URL de Webhook / Script de Google Sheets -->
-            <div>
-              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Enlace / Webhook Google Apps Script</label>
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Enlace / Webhook Google Apps Script</label>
+                <button type="button" onclick="toggleAppsScriptGuide()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 tap-effect">
+                  <i data-lucide="help-circle" class="w-3 h-3"></i>
+                  <span>¿Cómo activarlo?</span>
+                </button>
+              </div>
+
               <div class="flex gap-1.5">
                 <input 
                   id="google-sheet-url" 
                   type="text" 
                   value="https://script.google.com/macros/s/AKfycbz_huellitas_pos/exec" 
-                  placeholder="https://script.google.com/... o ID de Drive" 
+                  placeholder="https://script.google.com/macros/s/.../exec" 
                   class="flex-1 text-[11px] font-mono px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-indigo-500 text-slate-700 truncate"
                 />
                 <button onclick="saveGoogleConfig()" class="px-2.5 py-1.5 bg-slate-800 text-white text-[10px] font-bold rounded-xl tap-effect">
                   Guardar
                 </button>
+              </div>
+
+              <!-- Guía desplegable paso a paso -->
+              <div id="apps-script-guide" class="hidden p-3 bg-indigo-50/80 rounded-xl border border-indigo-200 text-slate-700 space-y-2 mt-1">
+                <div class="flex items-center justify-between">
+                  <h5 class="text-xs font-bold text-indigo-950 flex items-center gap-1">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
+                    Sincronización en vivo en 3 pasos:
+                  </h5>
+                  <button onclick="copyAppsScriptCode()" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 tap-effect shadow-xs">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copiar Código
+                  </button>
+                </div>
+
+                <ol class="text-[11px] space-y-1 list-decimal list-inside text-slate-600 font-medium">
+                  <li>En tu hoja de cálculo, ve a <strong>Extensiones &gt; Apps Script</strong>.</li>
+                  <li>Pega el código copiado y haz clic en <strong>Implementar &gt; Nueva implementación</strong>.</li>
+                  <li>Elige tipo <strong>Aplicación web</strong>, acceso: <strong>Cualquiera</strong> y copia la URL terminada en <code>/exec</code>.</li>
+                  <li>Pégala aquí arriba y haz clic en <strong>Guardar</strong>. ¡Listo!</li>
+                </ol>
               </div>
             </div>
           </div>
@@ -928,12 +955,71 @@
       lucide.createIcons();
     }
 
+    const APPS_SCRIPT_CODE = `function doPost(e) {
+  try {
+    var raw = e.postData ? e.postData.contents : "";
+    var data = JSON.parse(raw);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 1. Pestaña CLIENTES
+    if (data.tables && data.tables.clientes) {
+      var sheetClientes = ss.getSheetByName("Clientes") || ss.insertSheet("Clientes");
+      sheetClientes.clearContents();
+      sheetClientes.appendRow(["ID", "Nombre Completo", "Teléfono Contacto", "Compras Realizadas", "Total Gastado COP", "Fecha Registro"]);
+      data.tables.clientes.forEach(function(c) {
+        sheetClientes.appendRow([c.id, c.nombre, "'" + (c.contacto || ""), c.tickets_totales || 0, c.gasto_total || 0, c.fecha_registro || ""]);
+      });
+      var rCli = sheetClientes.getRange(1, 1, 1, 6);
+      rCli.setFontWeight("bold").setBackground("#4F46E5").setFontColor("#FFFFFF").setHorizontalAlignment("center");
+      sheetClientes.setFrozenRows(1);
+    }
+
+    // 2. Pestaña INVENTARIO
+    if (data.tables && data.tables.inventario) {
+      var sheetInv = ss.getSheetByName("Inventario") || ss.insertSheet("Inventario");
+      sheetInv.clearContents();
+      sheetInv.appendRow(["ID", "Producto", "Categoría", "Precio COP", "Stock Actual", "Stock Mínimo", "Estado Semáforo"]);
+      data.tables.inventario.forEach(function(p) {
+        sheetInv.appendRow([p.id, p.nombre, p.categoria, p.precio, p.stock_actual, p.stock_minimo, p.estado]);
+      });
+      var rInv = sheetInv.getRange(1, 1, 1, 7);
+      rInv.setFontWeight("bold").setBackground("#059669").setFontColor("#FFFFFF").setHorizontalAlignment("center");
+      sheetInv.setFrozenRows(1);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput("Servicio Huellitas POS Activo").setMimeType(ContentService.MimeType.TEXT);
+}`;
+
+    function copyAppsScriptCode() {
+      navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
+        playSuccessChime();
+        showToast('Código copiado al portapapeles', 'clipboard-check');
+      }).catch(() => {
+        showToast('Copia el código de la consola', 'info');
+      });
+    }
+
+    function toggleAppsScriptGuide() {
+      const guide = document.getElementById('apps-script-guide');
+      if (guide) {
+        guide.classList.toggle('hidden');
+        lucide.createIcons();
+      }
+    }
+
     function saveGoogleConfig() {
       const urlVal = document.getElementById('google-sheet-url').value.trim();
       googleConfig.webhookUrl = urlVal;
       localStorage.setItem('huellitas_google_webhook', urlVal);
       playSuccessChime();
-      showToast('Enlace de Google Drive / Sheets guardado', 'save');
+      showToast('Enlace de Google Apps Script guardado', 'save');
     }
 
     function handleAutoSyncChange(enabled) {
@@ -947,11 +1033,30 @@
         return;
       }
 
+      const isPlaceholder = !googleConfig.webhookUrl || googleConfig.webhookUrl.includes('AKfycbz_huellitas_pos');
+
       const btn = document.getElementById('btn-sync-drive');
       if (btn && !isSilent) {
         btn.disabled = true;
         btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Subiendo tablas a Google Drive...</span>';
         lucide.createIcons();
+      }
+
+      if (isPlaceholder) {
+        setTimeout(() => {
+          if (btn && !isSilent) {
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="cloud-upload" class="w-4 h-4"></i><span>Sincronizar Ahora a Google Drive</span>';
+            lucide.createIcons();
+          }
+          if (!isSilent) {
+            playBeep(260, 0.15, 'sawtooth');
+            showToast('⚠️ Pega tu enlace de Apps Script para sincronizar', 'alert-triangle', 'bg-amber-900/90');
+            const guide = document.getElementById('apps-script-guide');
+            if (guide) guide.classList.remove('hidden');
+          }
+        }, 300);
+        return;
       }
 
       // Preparar payload con ambas tablas: Inventario y Clientes
@@ -980,17 +1085,15 @@
         }
       };
 
-      // Si hay webhook configurado, enviar vía POST (con fallback silencioso)
-      if (googleConfig.webhookUrl && googleConfig.webhookUrl.startsWith('http')) {
-        try {
-          fetch(googleConfig.webhookUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(syncPayload)
-          }).catch(() => {});
-        } catch(e) {}
-      }
+      // Si hay webhook configurado, enviar vía POST con text/plain
+      try {
+        fetch(googleConfig.webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(syncPayload)
+        }).catch(() => {});
+      } catch(e) {}
 
       setTimeout(() => {
         const nowStr = 'Hoy, ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -1005,7 +1108,7 @@
 
         playSuccessChime();
         if (!isSilent) {
-          showToast('☁️ ¡Tablas sincronizadas en Google Drive!', 'check-circle');
+          showToast('☁️ ¡Tablas enviadas a Google Sheets!', 'check-circle');
         }
       }, 700);
     }
