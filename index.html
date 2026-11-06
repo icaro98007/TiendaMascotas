@@ -1109,15 +1109,29 @@ function doGet(e) {
         }
       };
 
-      // Si hay webhook configurado, enviar vía POST con text/plain
-      try {
-        fetch(googleConfig.webhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(syncPayload)
-        }).catch(() => {});
-      } catch(e) {}
+      // Sincronización híbrida: Primero puente local directo (rápido y garantizado) y fallback a webhook
+      fetch('http://127.0.0.1:5005', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(syncPayload)
+      }).then(res => {
+        if (!res.ok) fallbackWebhook();
+      }).catch(() => {
+        fallbackWebhook();
+      });
+
+      function fallbackWebhook() {
+        if (googleConfig.webhookUrl && googleConfig.webhookUrl.startsWith('http')) {
+          try {
+            fetch(googleConfig.webhookUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(syncPayload)
+            }).catch(() => {});
+          } catch(e) {}
+        }
+      }
 
       setTimeout(() => {
         const nowStr = 'Hoy, ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
