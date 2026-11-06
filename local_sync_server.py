@@ -7,6 +7,7 @@ import os
 
 MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
 MAPPING_FILE = os.path.join(os.path.dirname(__file__), "monthly_sheets.json")
+HTML_FILE = os.path.join(os.path.dirname(__file__), "index.html")
 
 def get_current_month_title():
     now = datetime.datetime.now()
@@ -47,7 +48,6 @@ def get_or_create_monthly_sheet(month_title=None):
     print(f"\n[AUTO-MES] No se encontró hoja para '{month_title}'. Verificando en Google Drive...")
     ok, out, _ = run_cmd(["readonly", "list", month_title])
     if ok and month_title in out:
-        # Extraer ID con regex
         match = re.search(r"(\b[a-zA-Z0-9_-]{35,}\b)", out)
         if match:
             found_id = match.group(1)
@@ -56,7 +56,6 @@ def get_or_create_monthly_sheet(month_title=None):
             save_sheet_mapping(mapping)
             return found_id
 
-    # Si no existe, crear la hoja para el nuevo mes automáticamente
     print(f"[AUTO-MES] Creando nueva hoja mensual '{month_title}' en Google Drive...")
     ok, out, err = run_cmd(["mutate", "create", month_title, "--json"])
     if not ok:
@@ -71,11 +70,8 @@ def get_or_create_monthly_sheet(month_title=None):
         new_id = match.group(1)
         print(f" -> Creada exitosamente hoja '{month_title}': {new_id}")
 
-        # Configurar pestañas Inventario y Clientes
         run_cmd(["mutate", "rename-sheet", new_id, "--sheet-id", "0", "--title", "Inventario"])
         run_cmd(["mutate", "add-sheet", new_id, "--title", "Clientes"])
-        
-        # Formatos iniciales
         run_cmd(["mutate", "format", new_id, "--sheet-id", "0", "--start-row", "0", "--end-row", "1", "--start-col", "0", "--end-col", "7", "--bold", "--align", "CENTER", "--bg-color", "#059669", "--fg-color", "#FFFFFF"])
         run_cmd(["mutate", "freeze", new_id, "--sheet-id", "0", "--rows", "1"])
 
@@ -94,6 +90,18 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        # Si entra a la raíz o a index.html, servir la aplicación completa
+        if self.path in ['/', '/index.html']:
+            if os.path.exists(HTML_FILE):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                with open(HTML_FILE, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+
+        # Si entra a /status o /api/status, retornar estado JSON
         month_title = get_current_month_title()
         sheet_id = get_or_create_monthly_sheet(month_title)
         mapping = load_sheet_mapping()
@@ -166,7 +174,7 @@ class SyncHandler(BaseHTTPRequestHandler):
 
 def run_server(port=5005):
     server = HTTPServer(('127.0.0.1', port), SyncHandler)
-    print(f"Servidor Huellitas POS (Modo Mensual) iniciado en http://127.0.0.1:{port}")
+    print(f"Huellitas POS Server activo en http://localhost:{port}")
     server.serve_forever()
 
 if __name__ == "__main__":
