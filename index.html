@@ -492,19 +492,27 @@
 
             <!-- Cuenta Conectada Info -->
             <div id="google-account-card" class="bg-white p-2.5 rounded-xl border border-slate-200/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                    G
-                  </div>
-                  <div>
-                    <h4 id="google-account-email" class="text-xs font-bold text-slate-800">hge1232009@gmail.com</h4>
-                    <p class="text-[10px] text-slate-500 font-medium">Carpeta: <span class="font-bold text-slate-700">Tienda mascotas</span></p>
-                  </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                  G
                 </div>
-                <button onclick="toggleGoogleConnection()" id="btn-toggle-google" class="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg tap-effect">
-                  Cambiar
-                </button>
+                <div class="flex-1 min-w-0">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tu Correo de Google</label>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <input 
+                      id="google-account-email-input" 
+                      type="email" 
+                      value="hge1232009@gmail.com" 
+                      placeholder="Escribe tu correo de Google" 
+                      class="flex-1 text-xs font-bold text-slate-800 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-500 truncate"
+                      onchange="saveGoogleEmail(this.value)"
+                    />
+                    <button onclick="saveGoogleEmail(document.getElementById('google-account-email-input').value)" class="px-2 py-1 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold rounded-lg tap-effect shrink-0">
+                      Guardar
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-slate-500 font-medium mt-1">Carpeta: <span class="font-bold text-slate-700">Tienda mascotas</span></p>
+                </div>
               </div>
 
               <!-- Acceso directo al archivo en Google Drive -->
@@ -681,14 +689,23 @@
 
     // Credenciales de Administrador & Google Drive Sync
     let adminPin = localStorage.getItem('huellitas_admin_pin') || '1234';
+    
+    // Webhook oficial generado por el usuario
+    const OFFICIAL_WEBHOOK = 'https://script.google.com/macros/s/AKfycbynbJz5Ipb0qAjvhDHv2ub7doeUlE8mTk8BXU9bmPZXqUbu5eusZkoYY1muBeMng6I90A/exec';
+    const storedWebhook = localStorage.getItem('huellitas_google_webhook');
+    const activeWebhook = (storedWebhook && !storedWebhook.includes('AKfycbz_huellitas_pos')) ? storedWebhook : OFFICIAL_WEBHOOK;
+    localStorage.setItem('huellitas_google_webhook', activeWebhook);
+
+    let savedEmail = localStorage.getItem('huellitas_admin_email') || 'hge1232009@gmail.com';
+
     let googleConfig = {
       connected: true,
-      email: 'hge1232009@gmail.com',
+      email: savedEmail,
       sheetName: 'Tienda Mascotas - Inventario y Clientes',
       sheetId: '1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE',
       folderName: 'Tienda mascotas',
       sheetUrl: 'https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit',
-      webhookUrl: localStorage.getItem('huellitas_google_webhook') || 'https://script.google.com/macros/s/AKfycbynbJz5Ipb0qAjvhDHv2ub7doeUlE8mTk8BXU9bmPZXqUbu5eusZkoYY1muBeMng6I90A/exec',
+      webhookUrl: activeWebhook,
       autoSync: true,
       lastSync: 'Hoy, ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
     };
@@ -907,9 +924,19 @@
       }, 150);
     }
 
+    function saveGoogleEmail(emailVal) {
+      const email = (emailVal || '').trim();
+      if (!email) return;
+      googleConfig.email = email;
+      localStorage.setItem('huellitas_admin_email', email);
+      playSuccessChime();
+      showToast('Correo guardado: ' + email, 'check');
+      updateAdminPanelUI();
+    }
+
     function updateAdminPanelUI() {
       const pill = document.getElementById('google-status-pill');
-      const emailEl = document.getElementById('google-account-email');
+      const emailInput = document.getElementById('google-account-email-input');
       const toggleBtn = document.getElementById('btn-toggle-google');
       const prodCountEl = document.getElementById('admin-sync-prod-count');
       const clientCountEl = document.getElementById('admin-sync-client-count');
@@ -921,21 +948,20 @@
       if (clientCountEl) clientCountEl.textContent = `${clients.length} ${clients.length === 1 ? 'cliente listo' : 'clientes listos'}`;
       if (lastSyncEl) lastSyncEl.textContent = `Última sincronización con Drive: ${googleConfig.lastSync}`;
       if (autoSyncCheck) autoSyncCheck.checked = googleConfig.autoSync;
-      if (urlInput && googleConfig.webhookUrl) urlInput.value = googleConfig.webhookUrl;
+      if (urlInput) urlInput.value = googleConfig.webhookUrl;
+      if (emailInput) emailInput.value = googleConfig.email;
 
       if (googleConfig.connected) {
         if (pill) {
           pill.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1';
           pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> Conectado';
         }
-        if (emailEl) emailEl.textContent = googleConfig.email;
         if (toggleBtn) toggleBtn.textContent = 'Desconectar';
       } else {
         if (pill) {
           pill.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 flex items-center gap-1';
           pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Desconectado';
         }
-        if (emailEl) emailEl.textContent = 'Sin cuenta vinculada';
         if (toggleBtn) toggleBtn.textContent = 'Conectar';
       }
     }
@@ -943,13 +969,11 @@
     function toggleGoogleConnection() {
       googleConfig.connected = !googleConfig.connected;
       if (googleConfig.connected) {
-        googleConfig.email = 'tienda.huellitas@gmail.com';
         playSuccessChime();
-        showToast('Cuenta de Google vinculada con éxito', 'check');
+        showToast('Google Drive conectado', 'check');
       } else {
-        googleConfig.email = '';
         playBeep(380, 0.05);
-        showToast('Cuenta de Google desvinculada', 'info');
+        showToast('Google Drive desvinculado', 'info');
       }
       updateAdminPanelUI();
       lucide.createIcons();
@@ -1731,34 +1755,23 @@ function doGet(e) {
       let clientName = 'Consumidor Final';
       let clientPhone = '-';
 
-      // Validación de datos del cliente
+      // Validación y registro de datos del cliente
       if (customerMode === 'nuevo') {
-        const nameVal = document.getElementById('cust-input-name').value.trim();
-        const phoneVal = document.getElementById('cust-input-phone').value.trim();
+        const nameInput = document.getElementById('cust-input-name');
+        const phoneInput = document.getElementById('cust-input-phone');
+        const nameVal = nameInput ? nameInput.value.trim() : '';
+        const phoneVal = phoneInput ? phoneInput.value.trim() : '';
 
-        if (!nameVal) {
-          playBeep(260, 0.12, 'sawtooth');
-          showToast('Ingresa el nombre del cliente o elige Anónimo', 'user', 'bg-amber-900/90');
-          document.getElementById('cust-input-name').focus();
-          return;
-        }
-
-        if (!phoneVal) {
-          playBeep(260, 0.12, 'sawtooth');
-          showToast('Ingresa el número de contacto', 'phone', 'bg-amber-900/90');
-          document.getElementById('cust-input-phone').focus();
-          return;
-        }
-
-        clientName = nameVal;
-        clientPhone = phoneVal;
+        clientName = nameVal || 'Cliente Mostrador';
+        clientPhone = phoneVal || 'Sin teléfono';
 
         // Registrar o actualizar cliente en memoria
         const totalPaid = getCartTotalPrice();
-        const existingClient = clients.find(c => c.phone === phoneVal || c.name.toLowerCase() === nameVal.toLowerCase());
+        const existingClient = clients.find(c => (phoneVal && c.phone === phoneVal) || c.name.toLowerCase() === clientName.toLowerCase());
         if (existingClient) {
           existingClient.totalPurchases += 1;
           existingClient.totalSpent += totalPaid;
+          if (phoneVal) existingClient.phone = phoneVal;
         } else {
           const newClientId = clients.length ? Math.max(...clients.map(c => c.id)) + 1 : 1;
           clients.unshift({
