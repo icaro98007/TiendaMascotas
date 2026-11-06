@@ -406,6 +406,16 @@
               <input id="np-min" required type="number" min="1" value="3" class="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none bg-slate-50">
             </div>
           </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 block mb-1">URL de la Imagen (Opcional)</label>
+            <div class="flex gap-2 items-center">
+              <input id="np-image" type="url" placeholder="https://ejemplo.com/foto.jpg" oninput="previewProductImage(this.value)" class="flex-1 text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none bg-slate-50">
+              <div id="np-image-preview" class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 text-slate-400 text-lg">
+                🐾
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Enlace a imagen web (PNG, JPG, WebP)</p>
+          </div>
           <button type="submit" class="w-full py-3 bg-emerald-600 text-white rounded-xl font-extrabold text-xs tap-effect shadow-md shadow-emerald-600/30 mt-2">
             Guardar Producto
           </button>
@@ -752,6 +762,7 @@
         price: 185000,
         stock: 8,
         minStock: 3,
+        imageUrl: "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?w=150&auto=format&fit=crop&q=80",
         emoji: "🐕",
         badge: "Top Ventas"
       },
@@ -762,6 +773,7 @@
         price: 78000,
         stock: 2, // ALERTA BAJO STOCK
         minStock: 4,
+        imageUrl: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=150&auto=format&fit=crop&q=80",
         emoji: "🐱",
         badge: "Nutrición"
       },
@@ -772,6 +784,7 @@
         price: 42000,
         stock: 1, // ALERTA CRÍTICA
         minStock: 3,
+        imageUrl: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=150&auto=format&fit=crop&q=80",
         emoji: "🛡️",
         badge: "Veterinario"
       },
@@ -782,6 +795,7 @@
         price: 18000,
         stock: 14,
         minStock: 5,
+        imageUrl: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=150&auto=format&fit=crop&q=80",
         emoji: "🎾",
         badge: "Resistente"
       },
@@ -792,6 +806,7 @@
         price: 16500,
         stock: 5, // Justo en el límite
         minStock: 5,
+        imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150&auto=format&fit=crop&q=80",
         emoji: "🦴",
         badge: "Higiene Oral"
       },
@@ -802,6 +817,7 @@
         price: 32000,
         stock: 12,
         minStock: 4,
+        imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150&auto=format&fit=crop&q=80",
         emoji: "📦",
         badge: "Control Olor"
       },
@@ -812,6 +828,7 @@
         price: 28000,
         stock: 2, // ALERTA BAJO STOCK
         minStock: 3,
+        imageUrl: "https://images.unsplash.com/photo-1535294435445-d7249524ef2e?w=150&auto=format&fit=crop&q=80",
         emoji: "🧴",
         badge: "Piel Sensible"
       },
@@ -822,6 +839,7 @@
         price: 95000,
         stock: 4,
         minStock: 2,
+        imageUrl: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=150&auto=format&fit=crop&q=80",
         emoji: "🪵",
         badge: "Antiarañazos"
       }
@@ -868,7 +886,22 @@
         const savedProducts = localStorage.getItem('huellitas_products');
         if (savedProducts) {
           const parsedProd = JSON.parse(savedProducts);
-          if (Array.isArray(parsedProd) && parsedProd.length) products = parsedProd;
+          if (Array.isArray(parsedProd) && parsedProd.length) {
+            const defaultMap = {
+              1: "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?w=150&auto=format&fit=crop&q=80",
+              2: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=150&auto=format&fit=crop&q=80",
+              3: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=150&auto=format&fit=crop&q=80",
+              4: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=150&auto=format&fit=crop&q=80",
+              5: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150&auto=format&fit=crop&q=80",
+              6: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150&auto=format&fit=crop&q=80",
+              7: "https://images.unsplash.com/photo-1535294435445-d7249524ef2e?w=150&auto=format&fit=crop&q=80",
+              8: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=150&auto=format&fit=crop&q=80"
+            };
+            products = parsedProd.map(p => ({
+              ...p,
+              imageUrl: p.imageUrl || defaultMap[p.id] || ''
+            }));
+          }
         }
       } catch (e) {
         console.warn("No se pudo cargar desde localStorage:", e);
@@ -1125,7 +1158,8 @@ function doGet(e) {
             precio: p.price,
             stock_actual: p.stock,
             stock_minimo: p.minStock,
-            estado: p.stock === 0 ? 'AGOTADO' : (p.stock <= p.minStock ? 'BAJO_STOCK' : 'OPTIMO')
+            estado: p.stock === 0 ? 'AGOTADO' : (p.stock <= p.minStock ? 'BAJO_STOCK' : 'OPTIMO'),
+            url: p.imageUrl || ''
           })),
           clientes: clients.map(c => ({
             id: c.id,
@@ -1201,10 +1235,10 @@ function doGet(e) {
       let filename = `huellitas_${tableType}_${new Date().toISOString().slice(0, 10)}.csv`;
 
       if (tableType === 'inventario') {
-        csvContent += "ID;Nombre;Categoria;Precio;StockActual;StockMinimo;Estado\n";
+        csvContent += "ID;Nombre;Categoria;Precio;StockActual;StockMinimo;Estado;URL\n";
         products.forEach(p => {
           const estado = p.stock === 0 ? 'AGOTADO' : (p.stock <= p.minStock ? 'BAJO' : 'OK');
-          csvContent += `"${p.id}";"${p.name}";"${p.category}";"${p.price}";"${p.stock}";"${p.minStock}";"${estado}"\n`;
+          csvContent += `"${p.id}";"${p.name}";"${p.category}";"${p.price}";"${p.stock}";"${p.minStock}";"${estado}";"${p.imageUrl || ''}"\n`;
         });
       } else {
         csvContent += "ID;Nombre;Telefono;TicketsComprados;TotalGastado;Fecha\n";
@@ -1488,8 +1522,8 @@ function doGet(e) {
               <!-- Top Card Info -->
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-xl shadow-inner">
-                    ${p.emoji || '🐾'}
+                  <div class="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-xl shadow-inner overflow-hidden shrink-0">
+                    ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='${p.emoji || '🐾'}';" />` : (p.emoji || '🐾')}
                   </div>
                   <div class="text-right">
                     ${stockTag}
@@ -1959,11 +1993,11 @@ function doGet(e) {
         return `
           <div class="p-3 rounded-2xl border ${cardStyle} shadow-2xs transition-all flex items-center justify-between gap-3">
             <!-- Icono y Nombre -->
-            <div class="flex items-center gap-3 overflow-hidden">
-              <div class="w-11 h-11 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-xl shadow-2xs shrink-0">
-                ${p.emoji || '🐾'}
+            <div class="flex items-center gap-3 overflow-hidden flex-1">
+              <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 flex items-center justify-center text-xl shadow-2xs shrink-0 overflow-hidden relative">
+                ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='${p.emoji || '🐾'}';" />` : (p.emoji || '🐾')}
               </div>
-              <div class="truncate">
+              <div class="truncate flex-1">
                 <div class="flex items-center gap-1.5 mb-0.5">
                   ${statusDot}
                   ${statusText}
@@ -1972,6 +2006,7 @@ function doGet(e) {
                 <div class="flex items-center gap-2 mt-0.5">
                   <span class="text-[11px] font-mono font-bold text-slate-700">${formatCOP(p.price)}</span>
                   <span class="text-[10px] font-semibold text-slate-400">• ${p.category}</span>
+                  ${p.imageUrl ? `<a href="${p.imageUrl}" target="_blank" onclick="event.stopPropagation()" class="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded flex items-center gap-0.5"><span>URL</span><i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>` : ''}
                 </div>
               </div>
             </div>
@@ -2010,20 +2045,24 @@ function doGet(e) {
             </div>
           </div>
 
-          <!-- Barra de Acciones: Filtro Alertas + Botón Añadir -->
-          <div class="flex items-center justify-between gap-2 pt-1">
-            <div class="flex items-center gap-1.5">
-              <button onclick="toggleAlertFilter(false)" class="px-3 py-1.5 rounded-xl text-xs font-bold tap-effect transition-all ${!inventoryFilterOnlyAlerts ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200'}">
+          <!-- BOTÓN PRINCIPAL: INGRESAR NUEVO PRODUCTO -->
+          <button onclick="openNewProductModal()" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-2xl font-black text-xs tap-effect shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2.5 transition-transform active:scale-98">
+            <div class="w-6 h-6 rounded-xl bg-white/20 flex items-center justify-center">
+              <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
+            </div>
+            <span class="tracking-wide text-xs">Ingresar Nuevo Producto</span>
+          </button>
+
+          <!-- Barra de Acciones: Filtro Alertas + Contador -->
+          <div class="flex items-center justify-between gap-2 pt-0.5">
+            <div class="flex items-center gap-1.5 w-full">
+              <button onclick="toggleAlertFilter(false)" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold tap-effect transition-all text-center ${!inventoryFilterOnlyAlerts ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200'}">
                 Todos (${products.length})
               </button>
-              <button onclick="toggleAlertFilter(true)" class="px-3 py-1.5 rounded-xl text-xs font-bold tap-effect transition-all ${inventoryFilterOnlyAlerts ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 border border-rose-200'} flex items-center gap-1">
+              <button onclick="toggleAlertFilter(true)" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold tap-effect transition-all text-center ${inventoryFilterOnlyAlerts ? 'bg-rose-600 text-white shadow-xs' : 'bg-rose-50 text-rose-700 border border-rose-200'} flex items-center justify-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> Alertas (${lowStockProducts.length})
               </button>
             </div>
-
-            <button onclick="openNewProductModal()" class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/30 tap-effect">
-              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
-            </button>
           </div>
 
           <!-- Lista de Productos -->
@@ -2069,10 +2108,25 @@ function doGet(e) {
       }
     }
 
+    function previewProductImage(url) {
+      const preview = document.getElementById('np-image-preview');
+      if (!preview) return;
+      const cleanUrl = (url || '').trim();
+      if (cleanUrl && (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:image'))) {
+        preview.innerHTML = `<img src="${cleanUrl}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='🐾';" />`;
+      } else {
+        preview.innerHTML = '🐾';
+      }
+    }
+
     function openNewProductModal() {
       playBeep(520, 0.04);
       const modal = document.getElementById('new-product-modal');
       const card = document.getElementById('new-product-card');
+      const imgInput = document.getElementById('np-image');
+      const preview = document.getElementById('np-image-preview');
+      if (imgInput) imgInput.value = '';
+      if (preview) preview.innerHTML = '🐾';
 
       modal.classList.remove('pointer-events-none', 'opacity-0');
       modal.classList.add('pointer-events-auto', 'opacity-100');
@@ -2102,6 +2156,7 @@ function doGet(e) {
       const category = document.getElementById('np-category').value;
       const stock = parseInt(document.getElementById('np-stock').value, 10);
       const minStock = parseInt(document.getElementById('np-min').value, 10);
+      const imageUrl = (document.getElementById('np-image')?.value || '').trim();
 
       const emojiMap = {
         'Alimento': '🥣',
@@ -2120,6 +2175,7 @@ function doGet(e) {
         price,
         stock,
         minStock,
+        imageUrl: imageUrl || '',
         emoji: emojiMap[category] || '🐾'
       });
 
@@ -2129,6 +2185,11 @@ function doGet(e) {
       playSuccessChime();
       showToast('Producto agregado al inventario', 'check');
       renderCurrentView();
+
+      // Sincronizar automáticamente en segundo plano a Google Drive si está conectado
+      if (googleConfig.autoSync && googleConfig.connected) {
+        syncAllToGoogleDrive(true);
+      }
     }
 
     /**

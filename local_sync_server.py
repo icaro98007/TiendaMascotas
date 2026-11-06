@@ -72,7 +72,7 @@ def get_or_create_monthly_sheet(month_title=None):
 
         run_cmd(["mutate", "rename-sheet", new_id, "--sheet-id", "0", "--title", "Inventario"])
         run_cmd(["mutate", "add-sheet", new_id, "--title", "Clientes"])
-        run_cmd(["mutate", "format", new_id, "--sheet-id", "0", "--start-row", "0", "--end-row", "1", "--start-col", "0", "--end-col", "7", "--bold", "--align", "CENTER", "--bg-color", "#059669", "--fg-color", "#FFFFFF"])
+        run_cmd(["mutate", "format", new_id, "--sheet-id", "0", "--start-row", "0", "--end-row", "1", "--start-col", "0", "--end-col", "8", "--bold", "--align", "CENTER", "--bg-color", "#059669", "--fg-color", "#FFFFFF"])
         run_cmd(["mutate", "freeze", new_id, "--sheet-id", "0", "--rows", "1"])
 
         mapping[month_title] = new_id
@@ -142,16 +142,17 @@ class SyncHandler(BaseHTTPRequestHandler):
             # 1. Sincronizar Inventario
             if "tables" in data and "inventario" in data["tables"]:
                 prods = data["tables"]["inventario"]
-                inv_rows = ["ID,Producto,Categoría,Precio COP,Stock Actual,Stock Mínimo,Estado Semáforo"]
+                inv_rows = ["ID,Producto,Categoría,Precio COP,Stock Actual,Stock Mínimo,Estado Semáforo,URL"]
                 for p in prods:
                     nombre = str(p.get("nombre", "")).replace(",", " ")
                     cat = str(p.get("categoria", "")).replace(",", " ")
-                    inv_rows.append(f"{p.get('id')},{nombre},{cat},{p.get('precio')},{p.get('stock_actual')},{p.get('stock_minimo')},{p.get('estado')}")
+                    url = str(p.get("url", "")).replace(",", "%2C")
+                    inv_rows.append(f"{p.get('id')},{nombre},{cat},{p.get('precio')},{p.get('stock_actual')},{p.get('stock_minimo')},{p.get('estado')},{url}")
                 
                 inv_data = "|".join(inv_rows)
                 end_row = len(inv_rows)
-                run_cmd(["mutate", "write", sheet_id, f"Inventario!A1:G{end_row}", inv_data])
-                print(f" -> Inventario actualizado ({len(prods)} productos)")
+                run_cmd(["mutate", "write", sheet_id, f"Inventario!A1:H{end_row}", inv_data])
+                print(f" -> Inventario actualizado ({len(prods)} productos con URL)")
 
             # 2. Sincronizar Clientes
             if "tables" in data and "clientes" in data["tables"]:
