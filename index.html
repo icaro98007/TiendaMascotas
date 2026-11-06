@@ -491,19 +491,36 @@
             </div>
 
             <!-- Cuenta Conectada Info -->
-            <div id="google-account-card" class="bg-white p-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                  G
+            <div id="google-account-card" class="bg-white p-2.5 rounded-xl border border-slate-200/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
+                    G
+                  </div>
+                  <div>
+                    <h4 id="google-account-email" class="text-xs font-bold text-slate-800">hge1232009@gmail.com</h4>
+                    <p class="text-[10px] text-slate-500 font-medium">Carpeta: <span class="font-bold text-slate-700">Tienda mascotas</span></p>
+                  </div>
                 </div>
-                <div>
-                  <h4 id="google-account-email" class="text-xs font-bold text-slate-800">tienda.huellitas@gmail.com</h4>
-                  <p class="text-[10px] text-slate-500 font-medium">Hoja: <span class="font-mono text-emerald-700 font-bold">Huellitas_DB_Master.gsheet</span></p>
-                </div>
+                <button onclick="toggleGoogleConnection()" id="btn-toggle-google" class="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg tap-effect">
+                  Cambiar
+                </button>
               </div>
-              <button onclick="toggleGoogleConnection()" id="btn-toggle-google" class="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg tap-effect">
-                Cambiar
-              </button>
+
+              <!-- Acceso directo al archivo en Google Drive -->
+              <div class="p-2 bg-emerald-50/80 rounded-xl border border-emerald-200/80 flex items-center justify-between">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                  <div class="truncate">
+                    <span class="text-[11px] font-bold text-emerald-950 block truncate">Tienda Mascotas - Inventario y Clientes</span>
+                    <span class="text-[9px] text-emerald-700 font-medium">Hojas: 'Inventario' y 'Clientes'</span>
+                  </div>
+                </div>
+                <a id="btn-open-drive-sheet" href="https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit" target="_blank" class="shrink-0 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg tap-effect flex items-center gap-1 shadow-xs">
+                  <span>Abrir</span>
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+              </div>
             </div>
 
             <!-- URL de Webhook / Script de Google Sheets -->
@@ -639,9 +656,11 @@
     let adminPin = localStorage.getItem('huellitas_admin_pin') || '1234';
     let googleConfig = {
       connected: true,
-      email: 'tienda.huellitas@gmail.com',
-      sheetName: 'Huellitas_DB_Master.gsheet',
-      folderName: 'Mi Unidad / Huellitas POS Backups',
+      email: 'hge1232009@gmail.com',
+      sheetName: 'Tienda Mascotas - Inventario y Clientes',
+      sheetId: '1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE',
+      folderName: 'Tienda mascotas',
+      sheetUrl: 'https://docs.google.com/spreadsheets/d/1s88JU2SGM3Rtg0uDZNgbDpqFCtgFxWcXdr-1TzeOeeE/edit',
       webhookUrl: localStorage.getItem('huellitas_google_webhook') || 'https://script.google.com/macros/s/AKfycbz_huellitas_pos/exec',
       autoSync: true,
       lastSync: 'Hoy, ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
@@ -752,6 +771,34 @@
         dateAdded: "01/11/2026"
       }
     ];
+
+    // Persistencia Local (localStorage en dispositivo)
+    function saveLocalData() {
+      try {
+        localStorage.setItem('huellitas_products', JSON.stringify(products));
+        localStorage.setItem('huellitas_clients', JSON.stringify(clients));
+      } catch (e) {
+        console.warn("No se pudo escribir en localStorage:", e);
+      }
+    }
+
+    function loadLocalData() {
+      try {
+        const savedClients = localStorage.getItem('huellitas_clients');
+        if (savedClients) {
+          const parsed = JSON.parse(savedClients);
+          if (Array.isArray(parsed) && parsed.length) clients = parsed;
+        }
+        const savedProducts = localStorage.getItem('huellitas_products');
+        if (savedProducts) {
+          const parsedProd = JSON.parse(savedProducts);
+          if (Array.isArray(parsedProd) && parsedProd.length) products = parsedProd;
+        }
+      } catch (e) {
+        console.warn("No se pudo cargar desde localStorage:", e);
+      }
+    }
+    loadLocalData();
 
     /**
      * =========================================================================
@@ -1656,6 +1703,7 @@
       openSuccessModal(totalPaid, selectedPayment, clientName, clientPhone);
 
       // Re-renderizar la vista actual (refleja el stock descontado al instante)
+      saveLocalData();
       renderCurrentView();
 
       // Sincronización automática a Google Drive en segundo plano si está activada
@@ -1850,6 +1898,7 @@
       playBeep(delta > 0 ? 680 : 380, 0.04);
       haptic();
 
+      saveLocalData();
       renderCurrentView();
       updateBadges();
 
@@ -1914,6 +1963,7 @@
 
       closeNewProductModal();
       document.getElementById('form-new-product').reset();
+      saveLocalData();
       playSuccessChime();
       showToast('Producto agregado al inventario', 'check');
       renderCurrentView();
