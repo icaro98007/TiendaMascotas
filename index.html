@@ -767,7 +767,6 @@
         phone: "+57 312 456 7890",
         totalPurchases: 2,
         totalSpent: 263000,
-        petName: "Toby (Golden Retriever)",
         dateAdded: "01/11/2026"
       }
     ];
@@ -787,7 +786,12 @@
         const savedClients = localStorage.getItem('huellitas_clients');
         if (savedClients) {
           const parsed = JSON.parse(savedClients);
-          if (Array.isArray(parsed) && parsed.length) clients = parsed;
+          if (Array.isArray(parsed) && parsed.length) {
+            clients = parsed.map(c => {
+              const { petName, ...rest } = c;
+              return rest;
+            });
+          }
         }
         const savedProducts = localStorage.getItem('huellitas_products');
         if (savedProducts) {
@@ -1660,7 +1664,6 @@
             phone: clientPhone,
             totalPurchases: 1,
             totalSpent: totalPaid,
-            petName: "Mascota",
             dateAdded: new Date().toLocaleDateString('es-ES')
           });
         }
